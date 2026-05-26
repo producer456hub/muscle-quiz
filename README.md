@@ -7,7 +7,7 @@ A gamified, single-file study game for **46 anatomy terms** covering **muscle ti
 Built in the same engine as [code-crew](https://github.com/producer456hub/code-crew), reskinned for a muscles unit (no EMT/ECG/phlebotomy framing).
 
 ## How to play
-Pick a tile from the 6-category board (a fresh **random board each game** is drawn from a 46-term bank) and answer before the timer runs out (the timer is optional — toggle **TIMED MODE** off any time).
+Pick a tile from the 6-category board (a fresh **random board each game** is drawn from a **92-question bank — two questions per term**, one on *structure* and one on *action/function*) and answer before the timer runs out (the timer is optional — toggle **TIMED MODE** off any time). Each question is multiple-choice with four options.
 
 - 🔥 **Combos** — consecutive correct answers raise your multiplier (up to ×3).
 - ⏱️ **Speed bonus** — faster answers score more.

@@ -560,65 +560,112 @@ const TERMS = {
   "galea aponeurotica":"The tough tendon sheet over the top of the skull that links frontalis and occipitalis."
 };
 
-/* ===================== QUESTION BANK: pools per category; board picks 5 random each game ===================== */
+/* ===================== QUESTION BANK: two questions (structure + action) per term; board picks 5 random each game.
+   Each item: {term: TERMS key, q: prompt, a: correct full-text option, opts: 4 full-text options}. ===================== */
 const QUIZ={
   "Muscle Tissue":[
-    {q:"A single, long, multinucleated cell — the basic unit of skeletal muscle.",a:"skeletal muscle fiber",opts:["skeletal muscle fiber","myofibrils","sarcomere"]},
-    {q:"Long contractile rods that fill the fiber, built from repeating sarcomeres.",a:"myofibrils",opts:["myofibrils","t-tubules","sarcoplasm"]},
-    {q:"The contractile unit running from one Z-disc to the next.",a:"sarcomere",opts:["sarcomere","myofibrils","sarcolemma"]},
-    {q:"The plasma (cell) membrane of a muscle fiber.",a:"sarcolemma",opts:["sarcolemma","sarcoplasm","sarcoplasmic reticulum"]},
-    {q:"The cytoplasm of a muscle fiber — stores glycogen and myoglobin.",a:"sarcoplasm",opts:["sarcoplasm","sarcolemma","sarcomere"]},
-    {q:"Inward folds of the membrane that carry the impulse deep into the fiber.",a:"t-tubules",opts:["t-tubules","myofibrils","sarcoplasmic reticulum"]},
-    {q:"Stores and releases the calcium that triggers contraction.",a:"sarcoplasmic reticulum",opts:["sarcoplasmic reticulum","t-tubules","mitochondria"]},
-    {q:"Skeletal fibers have MANY of these control centers, just under the membrane.",a:"nucleus",opts:["nucleus","mitochondria","sarcomere"]},
-    {q:"The organelle that produces the ATP powering contraction.",a:"mitochondria",opts:["mitochondria","nucleus","sarcoplasmic reticulum"]},
+    {term:"skeletal muscle fiber",q:"What fundamentally defines a skeletal muscle fiber?",a:"A single, multinucleated muscle cell",opts:["A single, multinucleated muscle cell","A bundle of muscle cells","Connective tissue surrounding a muscle","A motor neuron"]},
+    {term:"skeletal muscle fiber",q:"What is the primary function of a skeletal muscle fiber?",a:"Contracting to produce voluntary movement",opts:["Generating involuntary contractions","Contracting to produce voluntary movement","Storing excess bone calcium","Connecting muscle to bone"]},
+    {term:"myofibrils",q:"What are myofibrils structurally?",a:"Rod-like bundles of contractile proteins",opts:["The outer membrane of the muscle cell","Rod-like bundles of contractile proteins","Folds of the plasma membrane","Calcium storage tanks"]},
+    {term:"myofibrils",q:"What is the primary role of myofibrils?",a:"To shorten and create muscle tension",opts:["To store ATP","To shorten and create muscle tension","To carry action potentials","To anchor muscle to bone"]},
+    {term:"sarcomere",q:"How is a sarcomere anatomically defined?",a:"The functional contractile unit between two Z-discs",opts:["The functional contractile unit between two Z-discs","The entire length of a muscle fiber","The junction between nerve and muscle","The outer muscle sheath"]},
+    {term:"sarcomere",q:"What does the sarcomere do during muscle activity?",a:"It shortens to facilitate muscle contraction",opts:["It produces ATP","It shortens to facilitate muscle contraction","It stores calcium","It conducts electrical impulses"]},
+    {term:"sarcolemma",q:"What is the sarcolemma?",a:"The specialized plasma membrane of a muscle fiber",opts:["The fluid cytoplasm of a muscle cell","The specialized plasma membrane of a muscle fiber","A bundle of proteins","An oxygen-binding molecule"]},
+    {term:"sarcolemma",q:"What is a key function of the sarcolemma?",a:"Receiving and conducting action potentials",opts:["Storing calcium","Receiving and conducting action potentials","Breaking down ATP","Linking bones together"]},
+    {term:"sarcoplasm",q:"Which of the following best describes the sarcoplasm?",a:"The fluid cytoplasm of a muscle fiber",opts:["The fluid cytoplasm of a muscle fiber","The connective tissue surrounding a fascicle","The contractile unit","The plasma membrane"]},
+    {term:"sarcoplasm",q:"What specific function does the sarcoplasm serve?",a:"Housing glycogen, myoglobin, and organelles",opts:["Generating electrical impulses","Housing glycogen, myoglobin, and organelles","Anchoring muscle to bone","Transmitting voluntary nerve signals"]},
+    {term:"t-tubules",q:"Structurally, what are T-tubules?",a:"Deep invaginations of the sarcolemma",opts:["Bundles of actin and myosin","Deep invaginations of the sarcolemma","Storage sacs for calcium","Connective tissue sheaths"]},
+    {term:"t-tubules",q:"What role do T-tubules play in muscle contraction?",a:"Allowing electrical impulses to quickly reach the interior of the cell",opts:["Generating ATP","Allowing electrical impulses to quickly reach the interior of the cell","Pulling on Z-discs","Storing neurotransmitters"]},
+    {term:"sarcoplasmic reticulum",q:"What is the sarcoplasmic reticulum?",a:"A specialized network of smooth endoplasmic reticulum in muscle cells",opts:["A specialized network of smooth endoplasmic reticulum in muscle cells","The cell membrane","The contractile filaments","A bundle of fibers"]},
+    {term:"sarcoplasmic reticulum",q:"What is the primary task of the sarcoplasmic reticulum?",a:"Storing and releasing calcium ions upon stimulation",opts:["Absorbing nutrients","Storing and releasing calcium ions upon stimulation","Producing energy","Conducting nerve impulses"]},
+    {term:"nucleus",q:"How are nuclei arranged in mature skeletal muscle fibers?",a:"Multiple nuclei pushed to the periphery of the cell",opts:["A single centrally located nucleus","Multiple nuclei pushed to the periphery of the cell","No nuclei are present","Two central nuclei per cell"]},
+    {term:"nucleus",q:"Why does a skeletal muscle fiber need this specific nuclear arrangement?",a:"To direct the massive production of structural proteins needed by the large cell",opts:["To direct the massive production of structural proteins needed by the large cell","To conduct electricity","To store extra calcium","To prevent cell division"]},
+    {term:"mitochondria",q:"What are mitochondria?",a:"Organelles known as the powerhouse of the cell",opts:["Organelles that store calcium","Organelles known as the powerhouse of the cell","The plasma membrane","Contractile proteins"]},
+    {term:"mitochondria",q:"Why do skeletal muscle fibers contain high numbers of mitochondria?",a:"To produce the large amounts of ATP required for contraction",opts:["To synthesize neurotransmitters","To produce the large amounts of ATP required for contraction","To divide rapidly","To store oxygen"]},
   ],
   "Facial Muscles":[
-    {q:"Raises the eyebrows and wrinkles the forehead.",a:"frontalis",opts:["frontalis","occipitalis","temporalis"]},
-    {q:"Pulls the scalp backward; the rear belly of the occipitofrontalis.",a:"occipitalis",opts:["occipitalis","frontalis","masseter"]},
-    {q:"Closes the eyelids — the blinking and squinting muscle.",a:"orbicularis oculi",opts:["orbicularis oculi","orbicularis oris","nasalis"]},
-    {q:"Flares and compresses the nostrils.",a:"nasalis",opts:["nasalis","buccinator","mentalis"]},
-    {q:"Draws the mouth corner up and back — the main smiling muscle.",a:"zygomaticus major",opts:["zygomaticus major","zygomaticus minor","risorius"]},
-    {q:"Elevates the upper lip; assists the smile.",a:"zygomaticus minor",opts:["zygomaticus minor","zygomaticus major","depressor anguli oris"]},
-    {q:"Powerful jaw-closing muscle you feel bulge when you clench your teeth.",a:"masseter",opts:["masseter","temporalis","buccinator"]},
-    {q:"Compresses the cheek to keep food between the teeth (and helps you blow).",a:"buccinator",opts:["buccinator","risorius","nasalis"]},
-    {q:"Closes and purses the lips — kissing and whistling.",a:"orbicularis oris",opts:["orbicularis oris","orbicularis oculi","mentalis"]},
-    {q:"Pulls the corners of the mouth downward — the frowning muscle.",a:"depressor anguli oris",opts:["depressor anguli oris","risorius","zygomaticus minor"]},
-    {q:"Retracts the mouth corner straight out to the side (grimace).",a:"risorius",opts:["risorius","depressor anguli oris","zygomaticus major"]},
-    {q:"Wrinkles the chin and protrudes the lower lip (pouting).",a:"mentalis",opts:["mentalis","orbicularis oris","buccinator"]},
-    {q:"Fan-shaped chewing muscle that elevates and retracts the mandible.",a:"temporalis",opts:["temporalis","masseter","occipitalis"]},
+    {term:"occipitalis",q:"Where is the occipitalis muscle located?",a:"At the back of the skull",opts:["On the forehead","At the back of the skull","Around the mouth","In the neck"]},
+    {term:"occipitalis",q:"What is the primary action of the occipitalis?",a:"Pulling the scalp posteriorly",opts:["Closing the eyes","Pulling the scalp posteriorly","Smiling","Chewing"]},
+    {term:"frontalis",q:"Which region does the frontalis muscle cover?",a:"The forehead",opts:["The forehead","The cheeks","The chin","The back of the head"]},
+    {term:"frontalis",q:"What action does the frontalis perform?",a:"Raising the eyebrows and wrinkling the forehead",opts:["Raising the eyebrows and wrinkling the forehead","Closing the jaw","Puckering the lips","Rotating the head"]},
+    {term:"orbicularis oculi",q:"Structurally, how is the orbicularis oculi arranged?",a:"As a sphincter surrounding the eye",opts:["As a straight band across the forehead","As a sphincter surrounding the eye","As a fan shape on the side of the head","As a tube in the neck"]},
+    {term:"orbicularis oculi",q:"What does the orbicularis oculi do?",a:"Closes the eye (blinking/squinting)",opts:["Opens the eye","Closes the eye (blinking/squinting)","Moves the eyeball laterally","Flares the nostrils"]},
+    {term:"nasalis",q:"Where is the nasalis muscle situated?",a:"Over the nasal bone and cartilages",opts:["Over the nasal bone and cartilages","Around the lips","On the chin","Along the jawline"]},
+    {term:"nasalis",q:"What function does the nasalis serve?",a:"Compressing the nasal bridge and flaring the nostrils",opts:["Compressing the nasal bridge and flaring the nostrils","Blinking the eyes","Chewing food","Frowning"]},
+    {term:"zygomaticus major",q:"Where does the zygomaticus major originate?",a:"The zygomatic bone (cheekbone)",opts:["The mandible","The zygomatic bone (cheekbone)","The frontal bone","The occipital bone"]},
+    {term:"zygomaticus major",q:"What is the primary action of the zygomaticus major?",a:"Pulling the corners of the mouth upward and outward (smiling)",opts:["Frowning","Pulling the corners of the mouth upward and outward (smiling)","Chewing","Closing the eyes"]},
+    {term:"zygomaticus minor",q:"Compared to the major, where is the zygomaticus minor located?",a:"Superior and medial",opts:["Inferior and lateral","Superior and medial","On the back of the head","In the neck"]},
+    {term:"zygomaticus minor",q:"What movement does the zygomaticus minor assist with?",a:"Elevating the upper lip to smile",opts:["Elevating the upper lip to smile","Depressing the lower lip","Opening the eyes","Swallowing"]},
+    {term:"masseter",q:"What is the structural defining feature of the masseter?",a:"A thick, powerful muscle covering the lateral jaw",opts:["A circular muscle around the mouth","A thick, powerful muscle covering the lateral jaw","A thin sheet on the neck","A small muscle in the eye socket"]},
+    {term:"masseter",q:"What is the primary action of the masseter?",a:"Elevating the mandible (closing the jaw)",opts:["Elevating the mandible (closing the jaw)","Depressing the mandible","Smiling","Wrinkling the forehead"]},
+    {term:"buccinator",q:"Where is the buccinator muscle found?",a:"Deep in the cheek",opts:["Deep in the cheek","On the forehead","At the back of the neck","Covering the eye"]},
+    {term:"buccinator",q:"What crucial function does the buccinator perform?",a:"Compressing the cheek to keep food between the teeth",opts:["Opening the jaw widely","Compressing the cheek to keep food between the teeth","Elevating the eyebrows","Flexing the neck"]},
+    {term:"orbicularis oris",q:"How is the orbicularis oris shaped?",a:"Sphincter-like around the mouth",opts:["Triangular","Sphincter-like around the mouth","Straight and long","Fan-shaped"]},
+    {term:"orbicularis oris",q:"What is the primary action of the orbicularis oris?",a:"Closing and protruding the lips (kissing)",opts:["Chewing","Closing and protruding the lips (kissing)","Flaring the nostrils","Raising the eyelids"]},
+    {term:"depressor anguli oris",q:"Where does the depressor anguli oris attach?",a:"From the mandible to the corner of the mouth",opts:["From the mandible to the corner of the mouth","From the cheekbone to the upper lip","Around the eye","On the scalp"]},
+    {term:"depressor anguli oris",q:"What facial expression is this muscle responsible for?",a:"Frowning (drawing the corner of the mouth down)",opts:["Smiling","Frowning (drawing the corner of the mouth down)","Blinking","Flaring the nose"]},
+    {term:"risorius",q:"How is the risorius muscle positioned?",a:"Horizontally extending from the corner of the mouth",opts:["Vertically along the nose","Horizontally extending from the corner of the mouth","Circularly around the eye","Obliquely on the neck"]},
+    {term:"risorius",q:"What action does the risorius produce?",a:"Pulling the lips laterally into a tense smile",opts:["Pulling the lips laterally into a tense smile","Puckering the lips","Raising the eyebrows","Closing the jaw"]},
+    {term:"mentalis",q:"Where is the mentalis muscle located?",a:"On the chin",opts:["On the chin","On the forehead","Over the ear","Deep in the neck"]},
+    {term:"mentalis",q:"What happens when the mentalis contracts?",a:"It elevates and protrudes the lower lip (pouting)",opts:["It elevates and protrudes the lower lip (pouting)","It pulls the scalp back","It closes the eye","It turns the head"]},
+    {term:"temporalis",q:"Structurally, what does the temporalis look like?",a:"A broad, fan-shaped muscle on the side of the head",opts:["A circular sphincter","A broad, fan-shaped muscle on the side of the head","A long, strap-like muscle","A small, delicate muscle"]},
+    {term:"temporalis",q:"What does the temporalis do?",a:"Elevates and retracts the mandible",opts:["Depresses the jaw","Elevates and retracts the mandible","Wrinkles the forehead","Protracts the tongue"]},
   ],
   "Eye Muscles":[
-    {q:"Turns the eye medially — toward the nose.",a:"medial rectus",opts:["medial rectus","lateral rectus","superior rectus"]},
-    {q:"Turns the eye laterally — outward, away from the nose.",a:"lateral rectus",opts:["lateral rectus","medial rectus","inferior rectus"]},
-    {q:"Elevates the eye to look up (and adducts it).",a:"superior rectus",opts:["superior rectus","inferior rectus","inferior oblique"]},
-    {q:"Depresses the eye to look down (and adducts it).",a:"inferior rectus",opts:["inferior rectus","superior rectus","superior oblique"]},
-    {q:"Elevates the eye and turns it laterally (looks up-and-out).",a:"inferior oblique",opts:["inferior oblique","superior oblique","superior rectus"]},
-    {q:"Depresses the eye and turns it laterally; loops through the trochlea.",a:"superior oblique",opts:["superior oblique","inferior oblique","inferior rectus"]},
+    {term:"inferior oblique",q:"Where is the inferior oblique positioned?",a:"Wrapping around the bottom of the eyeball from the medial side",opts:["Wrapping around the bottom of the eyeball from the medial side","Running straight across the top of the eye","On the lateral side of the face","In the inner ear"]},
+    {term:"inferior oblique",q:"What movement does the inferior oblique cause?",a:"Elevates the eye and turns it laterally (extorsion)",opts:["Elevates the eye and turns it laterally (extorsion)","Depresses the eye","Pulls the eye straight medially","Closes the eyelid"]},
+    {term:"superior oblique",q:"What unique anatomical feature is associated with the superior oblique?",a:"It passes through a pulley-like cartilaginous loop called the trochlea",opts:["It passes through a pulley-like cartilaginous loop called the trochlea","It attaches directly to the optic nerve","It originates on the jaw","It splits into two bellies"]},
+    {term:"superior oblique",q:"What action does the superior oblique perform?",a:"Depresses the eye and turns it laterally (intorsion)",opts:["Elevates the eye","Depresses the eye and turns it laterally (intorsion)","Adducts the eye","Opens the eyelid"]},
+    {term:"medial rectus",q:"Where does the medial rectus insert?",a:"On the medial surface of the eyeball",opts:["On the medial surface of the eyeball","On the superior surface of the eyeball","On the eyelid","On the nose"]},
+    {term:"medial rectus",q:"What happens when the medial rectus contracts?",a:"The eye adducts (looks inward)",opts:["The eye abducts","The eye adducts (looks inward)","The eye rolls upward","The eye depresses"]},
+    {term:"lateral rectus",q:"Which structure innervates the lateral rectus?",a:"Abducens nerve (CN VI)",opts:["Abducens nerve (CN VI)","Optic nerve (CN II)","Facial nerve (CN VII)","Vagus nerve (CN X)"]},
+    {term:"lateral rectus",q:"What is the sole action of the lateral rectus?",a:"Looking laterally (abduction)",opts:["Looking downward","Looking inward","Looking laterally (abduction)","Closing the eye"]},
+    {term:"superior rectus",q:"Where is the superior rectus located?",a:"On the top surface of the eyeball",opts:["On the top surface of the eyeball","On the bottom of the eyeball","In the cheek","Under the tongue"]},
+    {term:"superior rectus",q:"What is the primary movement produced by the superior rectus?",a:"Eye elevation (looking up)",opts:["Eye elevation (looking up)","Eye depression","Eye adduction","Eye extorsion"]},
+    {term:"inferior rectus",q:"Where does the inferior rectus attach?",a:"To the inferior surface of the eyeball",opts:["To the inferior surface of the eyeball","To the superior surface of the eyeball","To the lateral wall","To the cornea"]},
+    {term:"inferior rectus",q:"What is the primary action of the inferior rectus?",a:"Depressing the eye (looking down)",opts:["Elevating the eye","Depressing the eye (looking down)","Blinking","Abducting the eye"]},
   ],
   "Chest & Breathing":[
-    {q:"Flexes, adducts and medially rotates the arm; O: clavicle/sternum, I: humerus.",a:"pectoralis major",opts:["pectoralis major","pectoralis minor","serratus anterior"]},
-    {q:"Depresses & protracts the scapula; O: ribs 3–5, I: coracoid process.",a:"pectoralis minor",opts:["pectoralis minor","pectoralis major","serratus anterior"]},
-    {q:"The dome-shaped primary muscle of breathing.",a:"diaphragm",opts:["diaphragm","external intercostals","innermost intercostals"]},
-    {q:"Elevate the rib cage during inspiration.",a:"external intercostals",opts:["external intercostals","internal intercostals","diaphragm"]},
-    {q:"Depress the rib cage during forced expiration.",a:"internal intercostals",opts:["internal intercostals","external intercostals","innermost intercostals"]},
-    {q:"The deepest intercostal layer, assisting the internal intercostals.",a:"innermost intercostals",opts:["innermost intercostals","external intercostals","internal intercostals"]},
-    {q:"Protracts the scapula and pins it to the chest wall — the 'boxer's muscle.'",a:"serratus anterior",opts:["serratus anterior","pectoralis minor","pectoralis major"]},
+    {term:"pectoralis major",q:"What are the origin and insertion of the pectoralis major?",a:"Origin: Clavicle/Sternum/Rib Cartilage, Insertion: Intertubercular sulcus of humerus",opts:["Origin: Clavicle/Sternum/Rib Cartilage, Insertion: Intertubercular sulcus of humerus","Origin: Scapula, Insertion: Radius","Origin: Pelvis, Insertion: Femur","Origin: Spine, Insertion: Sternum"]},
+    {term:"pectoralis major",q:"What does the pectoralis major primarily do?",a:"Flexes, adducts, and medially rotates the arm",opts:["Extends the arm","Flexes, adducts, and medially rotates the arm","Abducts the arm","Shrugs the shoulders"]},
+    {term:"pectoralis minor",q:"Where is the pectoralis minor in relation to the pectoralis major?",a:"Deep to it",opts:["Superficial to it","Deep to it","Inferior to the abdomen","On the back"]},
+    {term:"pectoralis minor",q:"What is the action of the pectoralis minor?",a:"Drawing the scapula downward and forward (and elevating ribs)",opts:["Drawing the scapula downward and forward (and elevating ribs)","Extending the humerus","Laterally rotating the arm","Extending the spine"]},
+    {term:"diaphragm",q:"What is the anatomical structure of the diaphragm?",a:"A dome-shaped muscle separating the thoracic and abdominopelvic cavities",opts:["A dome-shaped muscle separating the thoracic and abdominopelvic cavities","A straight muscle running down the back","A tiny muscle in the neck","A circular muscle around the mouth"]},
+    {term:"diaphragm",q:"What happens during the contraction of the diaphragm?",a:"It flattens, increasing thoracic volume to cause inspiration",opts:["It pushes upward, forcing air out","It flattens, increasing thoracic volume to cause inspiration","It constricts the intestines","It rotates the spine"]},
+    {term:"external intercostals",q:"Where are the external intercostal muscles located?",a:"Between the ribs, with fibers running obliquely downwards and forwards",opts:["Between the ribs, with fibers running obliquely downwards and forwards","Inside the stomach","Along the spine","On the arms"]},
+    {term:"external intercostals",q:"What role do the external intercostals play?",a:"They elevate the rib cage to aid in inspiration",opts:["They depress the ribs during forced expiration","They elevate the rib cage to aid in inspiration","They twist the torso","They flex the arm"]},
+    {term:"internal intercostals",q:"How do the internal intercostals differ from the external intercostals?",a:"Their fibers run deep and at roughly right angles to the external intercostals",opts:["They are located on the limbs","Their fibers run deep and at roughly right angles to the external intercostals","They are only found in the neck","They are involuntary smooth muscle"]},
+    {term:"internal intercostals",q:"What is the primary action of the internal intercostals?",a:"Depressing the rib cage during forced expiration",opts:["Elevating the ribs","Depressing the rib cage during forced expiration","Expanding the lungs","Extending the back"]},
+    {term:"innermost intercostals",q:"Where are the innermost intercostals positioned?",a:"The deepest layer of muscles between the ribs",opts:["The deepest layer of muscles between the ribs","On the outside of the rib cage","In the lower back","In the pelvis"]},
+    {term:"innermost intercostals",q:"What is the general function of the innermost intercostals?",a:"They assist the internal intercostals in depressing the ribs",opts:["They assist the internal intercostals in depressing the ribs","They are the prime movers of arm flexion","They protect the heart directly","They elevate the scapula"]},
+    {term:"serratus anterior",q:"Structurally, how does the serratus anterior appear?",a:"Like a jagged, saw-toothed edge along the lateral ribs",opts:["Like a jagged, saw-toothed edge along the lateral ribs","Like a smooth, round ball","Like a long thin wire","Like a large flat square"]},
+    {term:"serratus anterior",q:"What action is the serratus anterior famous for?",a:"Protracting and upwardly rotating the scapula (the \"boxer's muscle\")",opts:["Retracting the scapula","Protracting and upwardly rotating the scapula (the \"boxer's muscle\")","Extending the arm","Flexing the wrist"]},
   ],
   "Abdomen & Back":[
-    {q:"Outermost flat ab muscle; fibers run down-and-medial ('hands in pockets').",a:"external oblique",opts:["external oblique","internal oblique","transverse abdominis"]},
-    {q:"Middle flat ab muscle; fibers run up-and-medial, perpendicular to the outer layer.",a:"internal oblique",opts:["internal oblique","external oblique","transverse abdominis"]},
-    {q:"Deepest ab muscle; horizontal fibers compress the belly like a corset.",a:"transverse abdominis",opts:["transverse abdominis","internal oblique","external oblique"]},
-    {q:"Flexes the trunk and compresses the abdomen — the 'six-pack.'",a:"rectus abdominis",opts:["rectus abdominis","external oblique","transverse abdominis"]},
-    {q:"Broad back muscle that extends, adducts and medially rotates the arm.",a:"latissimus dorsi",opts:["latissimus dorsi","trapezius","rectus abdominis"]},
+    {term:"external oblique",q:"Where is the external oblique located?",a:"It is the most superficial muscle of the lateral abdominal wall",opts:["It is the most superficial muscle of the lateral abdominal wall","It is deep within the pelvis","It is on the posterior back","It is inside the rib cage"]},
+    {term:"external oblique",q:"What happens when both external obliques contract simultaneously?",a:"They compress the abdomen and flex the vertebral column",opts:["They extend the spine","They compress the abdomen and flex the vertebral column","They shrug the shoulders","They abduct the legs"]},
+    {term:"internal oblique",q:"How is the internal oblique positioned relative to the external oblique?",a:"Deep, with fibers running roughly perpendicular to the external oblique",opts:["Superficial","Deep, with fibers running roughly perpendicular to the external oblique","Superior in the neck","Inferior in the legs"]},
+    {term:"internal oblique",q:"What is a key action of the internal oblique?",a:"Unilateral contraction causes lateral flexion and rotation to the same side",opts:["Unilateral contraction causes lateral flexion and rotation to the same side","It extends the arm","It elevates the ribs","It extends the head"]},
+    {term:"transverse abdominis",q:"Where is the transverse abdominis?",a:"The deepest muscle layer of the anterior/lateral abdominal wall",opts:["The deepest muscle layer of the anterior/lateral abdominal wall","The most superficial abdominal muscle","Along the spine","In the chest"]},
+    {term:"transverse abdominis",q:"What is the main function of the transverse abdominis?",a:"Compressing the abdominal contents",opts:["Twisting the torso","Compressing the abdominal contents","Flexing the spine","Breathing out heavily"]},
+    {term:"rectus abdominis",q:"What is the structure of the rectus abdominis?",a:"A pair of long, straight muscles running vertically down the anterior abdomen",opts:["A pair of long, straight muscles running vertically down the anterior abdomen","A fan-shaped muscle on the back","A circular muscle","A horizontal band across the chest"]},
+    {term:"rectus abdominis",q:"What is the origin, insertion, and action of the rectus abdominis?",a:"Origin: Pubis, Insertion: Sternum/Costal cartilages; Action: Flexes the lumbar spine",opts:["Origin: Pubis, Insertion: Sternum/Costal cartilages; Action: Flexes the lumbar spine","Origin: Sternum, Insertion: Scapula; Action: Moves the arm","Origin: Ribs, Insertion: Pelvis; Action: Extends the spine","Origin: Clavicle, Insertion: Jaw; Action: Moves the head"]},
+    {term:"latissimus dorsi",q:"What is the distinguishing structural feature of the latissimus dorsi?",a:"It is a massive, wide muscle covering the lower back",opts:["It is a small facial muscle","It is a massive, wide muscle covering the lower back","It is a deep neck muscle","It is an intrinsic eye muscle"]},
+    {term:"latissimus dorsi",q:"What is the primary action of the latissimus dorsi?",a:"Extension, adduction, and medial rotation of the arm",opts:["Flexion and abduction of the arm","Extension, adduction, and medial rotation of the arm","Elevation of the scapula","Flexion of the torso"]},
   ],
   "Neck & Landmarks":[
-    {q:"Both sides flex the neck; one side rotates the head to the opposite side.",a:"sternocleidomastoid",opts:["sternocleidomastoid","trapezius","galea aponeurotica"]},
-    {q:"Kite-shaped muscle that elevates, retracts and rotates the scapula.",a:"trapezius",opts:["trapezius","sternocleidomastoid","latissimus dorsi"]},
-    {q:"Fibrous wrap covering the front of rectus abdominis.",a:"anterior rectus sheath",opts:["anterior rectus sheath","linea alba","tendinous intersections"]},
-    {q:"Fibrous bands across rectus abdominis that create the six-pack segments.",a:"tendinous intersections",opts:["tendinous intersections","linea alba","anterior rectus sheath"]},
-    {q:"The midline 'white line' where the abdominal aponeuroses meet.",a:"linea alba",opts:["linea alba","tendinous intersections","anterior rectus sheath"]},
-    {q:"Tough tendon sheet over the skull linking frontalis and occipitalis.",a:"galea aponeurotica",opts:["galea aponeurotica","sternocleidomastoid","trapezius"]},
+    {term:"sternocleidomastoid",q:"Where does the sternocleidomastoid (SCM) originate and insert?",a:"Origin: Sternum/Clavicle, Insertion: Mastoid process",opts:["Origin: Sternum/Clavicle, Insertion: Mastoid process","Origin: Scapula, Insertion: Occipital bone","Origin: Ribs, Insertion: Humerus","Origin: Spine, Insertion: Femur"]},
+    {term:"sternocleidomastoid",q:"What action occurs upon unilateral contraction of the SCM?",a:"Lateral flexion to the same side and rotation to the opposite side",opts:["Extension of the neck","Lateral flexion to the same side and rotation to the opposite side","Elevation of the shoulders","Depression of the jaw"]},
+    {term:"trapezius",q:"How is the trapezius muscle shaped?",a:"Like a large diamond or kite on the upper back/neck",opts:["Like a tube","Like a large diamond or kite on the upper back/neck","Like a circle","Like a small strap"]},
+    {term:"trapezius",q:"What are the primary actions of the trapezius?",a:"Extending the head and elevating/retracting the scapula",opts:["Flexing the arm","Extending the head and elevating/retracting the scapula","Compressing the abdomen","Breathing"]},
+    {term:"anterior rectus sheath",q:"What forms the anterior rectus sheath?",a:"The aponeuroses of the external and internal oblique muscles",opts:["The aponeuroses of the external and internal oblique muscles","Bone","Muscle fibers","Cartilage"]},
+    {term:"anterior rectus sheath",q:"What is the function of the anterior rectus sheath?",a:"To enclose and support the rectus abdominis muscle",opts:["To generate movement","To enclose and support the rectus abdominis muscle","To store fat","To conduct nerve impulses"]},
+    {term:"tendinous intersections",q:"What are the tendinous intersections?",a:"Bands of fibrous connective tissue that horizontally cross the rectus abdominis",opts:["Bands of fibrous connective tissue that horizontally cross the rectus abdominis","Blood vessels in the abdomen","Nerves serving the torso","Layers of fat"]},
+    {term:"tendinous intersections",q:"What is the visual result of the tendinous intersections?",a:"They divide the rectus abdominis into the visible \"six-pack\" segments",opts:["They make the abdomen smooth","They divide the rectus abdominis into the visible \"six-pack\" segments","They form the belly button","They create the waistline"]},
+    {term:"linea alba",q:"Where is the linea alba located?",a:"Down the anterior midline of the abdomen",opts:["Down the posterior midline of the back","Down the anterior midline of the abdomen","Across the chest","Around the neck"]},
+    {term:"linea alba",q:"What is the structural makeup of the linea alba?",a:"It is a band of fused connective tissue (aponeuroses) separating the left and right rectus abdominis",opts:["It is a vein","It is a band of fused connective tissue (aponeuroses) separating the left and right rectus abdominis","It is a solid bone","It is a single long muscle"]},
+    {term:"galea aponeurotica",q:"What is the galea aponeurotica?",a:"A tough, fibrous sheet of connective tissue spanning the top of the skull",opts:["A tough, fibrous sheet of connective tissue spanning the top of the skull","A muscle in the cheek","A tendon in the foot","A ligament in the hand"]},
+    {term:"galea aponeurotica",q:"What structures does the galea aponeurotica connect?",a:"The frontalis muscle to the occipitalis muscle",opts:["The biceps to the triceps","The frontalis muscle to the occipitalis muscle","The sternum to the clavicle","The eye to the orbit"]},
   ],
 };
 
@@ -1038,7 +1085,7 @@ function recordStat(t,right){
 function weightedPick(items,n){   // pick n distinct items, biased by termWeight (no replacement)
   const pool=items.slice(), out=[];
   while(out.length<n && pool.length){
-    const ws=pool.map(it=>termWeight(it.a)); let total=ws.reduce((a,b)=>a+b,0), r=Math.random()*total, i=0;
+    const ws=pool.map(it=>termWeight(it.term)); let total=ws.reduce((a,b)=>a+b,0), r=Math.random()*total, i=0;
     while(i<ws.length-1 && r>ws[i]){ r-=ws[i]; i++; }
     out.push(pool[i]); pool.splice(i,1);
   }
@@ -1053,7 +1100,7 @@ function renderQuiz(){
   clearDocFx();
   patientHP=100; codeBlueHappened=false; updateHP(0);
   const cats=Object.keys(QUIZ);
-  BOARD={}; cats.forEach(c=>{ BOARD[c]=weightedPick(QUIZ[c],5).map((it,i)=>({p:(i+1)*100,q:it.q,a:it.a,opts:it.opts})); });
+  BOARD={}; cats.forEach(c=>{ BOARD[c]=weightedPick(QUIZ[c],5).map((it,i)=>({p:(i+1)*100,term:it.term,q:it.q,a:it.a,opts:it.opts})); });
   bonusCells=new Set(); const all=[]; cats.forEach((c,ci)=>[0,1,2,3,4].forEach(r=>all.push(ci+"-"+r)));
   shuffle(all).slice(0,2).forEach(k=>bonusCells.add(k));
   main.innerHTML=`
@@ -1196,7 +1243,7 @@ function quizAnswer(o,b,item,cell,isBonus){
   if(isRight){
     b.classList.add("correct");
     streak++; maxStreak=Math.max(maxStreak,streak); correct++;
-    recordStat(item.a,true);
+    recordStat(item.term,true);
     const mult=multiplierFor(streak);
     const speedBonus=timed?Math.round(item.p*0.5*Math.max(0,(QTIME-elapsed)/QTIME)):0;
     let gained=Math.round((item.p+speedBonus)*mult*(isBonus?2:1));
@@ -1205,7 +1252,7 @@ function quizAnswer(o,b,item,cell,isBonus){
     if(streak>=2 && streak%2===0) SFX.combo(streak);
     const rect=b.getBoundingClientRect();
     const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
-    wordZoom(item.a,cx,cy);
+    wordZoom(item.term,cx,cy);
     burst(cx,cy,isBonus?40:24,isBonus?["#b388ff","#ffd45e","#fff"]:["#ff3ca6","#ffd45e","#2ad4ff"],isBonus?9:6);
     floatPop(cx-10,cy-10,"+"+gained,isBonus?"#b388ff":"#2ad4ff");
     animateNum($("#qScore"),score);
@@ -1217,16 +1264,15 @@ function quizAnswer(o,b,item,cell,isBonus){
     { const bt=banter({right:true,bonus:isBonus,streak,hp:patientHP,correct}); converse(bt.m,bt.c,bt.cls); }
     const bonusBump=$("#multi"); bonusBump.classList.remove("bump"); void bonusBump.offsetWidth; bonusBump.classList.add("bump");
     fb.className="feedback ok show";
-    fb.innerHTML=`✅ <span class="term">${item.a}</span>
-      <div class="defmain">${TERMS[item.a]||''}</div>
-      <div class="learnrow">${wikiLink(item.a,"🔎 Read more about "+item.a)}</div>
-      <span style="color:var(--muted);font-size:17px">+${item.p} base${speedBonus?` · +${speedBonus} speed`:''}${mult>1?` · ×${mult} combo`:''}${isBonus?' · ⚡×2 bonus':''} = <b style="color:var(--gold)">+${gained}</b></span>
-      ${optDefs(item)}`;
+    fb.innerHTML=`✅ <span class="term">${item.term}</span>
+      <div class="defmain">${TERMS[item.term]||''}</div>
+      <div class="learnrow">${wikiLink(item.term,"🔎 Read more about "+item.term)}</div>
+      <span style="color:var(--muted);font-size:17px">+${item.p} base${speedBonus?` · +${speedBonus} speed`:''}${mult>1?` · ×${mult} combo`:''}${isBonus?' · ⚡×2 bonus':''} = <b style="color:var(--gold)">+${gained}</b></span>`;
   }else{
     if(b) b.classList.add("wrong");
     $("#qChoices").querySelectorAll(".choice").forEach(x=>{if(x.textContent===item.a)x.classList.add("correct");});
-    missed.push(item.a);
-    recordStat(item.a,false);
+    missed.push(item.term);
+    recordStat(item.term,false);
     streak=0;
     const lost=Math.min(score,item.p);                 // don't drop below zero
     score-=lost;
@@ -1238,10 +1284,10 @@ function quizAnswer(o,b,item,cell,isBonus){
     setEmo(patientHP<=20 ? 'critical' : 'bad');
     { const bt=banter({right:false,timedOut,hp:patientHP,streak,correct}); converse(bt.m,bt.c,bt.cls); }
     fb.className="feedback no show";
-    fb.innerHTML=`${timedOut?'⏱️ <b>OUT OF TIME!</b> ':'❌ '}Correct answer: <span class="term">${item.a}</span>
-      <div class="defmain">${TERMS[item.a]||''}</div>
-      <div class="learnrow">${wikiLink(item.a,"🔎 Read more about "+item.a)}</div>
-      <span style="color:var(--muted);font-size:17px">−${lost} points · combo reset.</span>${optDefs(item)}`;
+    fb.innerHTML=`${timedOut?'⏱️ <b>OUT OF TIME!</b> ':'❌ '}Correct answer: <b style="color:var(--good)">${item.a}</b>
+      <div class="defmain"><span class="term">${item.term}</span> — ${TERMS[item.term]||''}</div>
+      <div class="learnrow">${wikiLink(item.term,"🔎 Read more about "+item.term)}</div>
+      <span style="color:var(--muted);font-size:17px">−${lost} points · combo reset.</span>`;
   }
   updateCombo();
   cleared++;
@@ -1269,7 +1315,7 @@ function rankFor(c){
 }
 
 /* ---- end-of-shift doctor debrief ---- */
-const CAT_OF={}; Object.keys(QUIZ).forEach(c=>QUIZ[c].forEach(it=>CAT_OF[it.a]=c));
+const CAT_OF={}; Object.keys(QUIZ).forEach(c=>QUIZ[c].forEach(it=>CAT_OF[it.term]=c));
 const DOMAIN={
   "Muscle Tissue":"muscle-cell structure",
   "Facial Muscles":"the muscles of facial expression",
@@ -1352,7 +1398,7 @@ function culprit(){
   const tally={}; uniq.forEach(t=>{const c=CAT_OF[t]; tally[c]=(tally[c]||0)+1;});
   let topCat=null,topN=0; Object.keys(tally).forEach(c=>{if(tally[c]>topN){topN=tally[c];topCat=c;}});
   let term=null,topP=-1;
-  uniq.filter(t=>CAT_OF[t]===topCat).forEach(t=>{ const p=((BOARD[topCat]||[]).find(i=>i.a===t)||{}).p||0; if(p>topP){topP=p;term=t;} });
+  uniq.filter(t=>CAT_OF[t]===topCat).forEach(t=>{ const p=((BOARD[topCat]||[]).find(i=>i.term===t)||{}).p||0; if(p>topP){topP=p;term=t;} });
   return {cat:topCat, domain:DOMAIN[topCat], term, danger:DANGER[term]||("complications from "+DOMAIN[topCat])};
 }
 function debrief(died){
