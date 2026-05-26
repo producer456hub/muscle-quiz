@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Muscle Quiz: Stat! — Muscles, Muscle Tissue & Landmarks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0518; --panel:#160a1f; --panel2:#22102f;
+    --line:#7a3aa0; --text:#fdf7ff; --muted:#d2bee6;
+    --phos:#ff3ca6; --quiz:#ff3ca6; --good:#2ad4ff; --bad:#ff3b3b; --gold:#ffd45e; --purple:#b388ff;
+    --px:'Press Start 2P','Courier New',monospace;
+    --rt:'VT323','Courier New',monospace;
+    --bevel: inset -3px -3px 0 0 rgba(0,0,0,.5), inset 3px 3px 0 0 rgba(255,255,255,.12);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html{height:100%;}
+  body{margin:0;
+    font-family:var(--rt); font-size:23px; letter-spacing:.2px;
+    background:var(--bg); background-attachment:fixed;
+    color:var(--text); overflow-x:hidden; user-select:none; min-height:100%;
+  }
+  .choice,.cell,.btn,.iconbtn,.backbtn{touch-action:manipulation;}
+  /* CRT overlay */
+  #crt{position:fixed;inset:0;pointer-events:none;z-index:60;}
+  #crt::before{content:"";position:absolute;inset:0;
+    background:repeating-linear-gradient(rgba(255,255,255,.005) 0 2px, rgba(0,0,0,.04) 2px 5px);}
+  #crt::after{content:"";position:absolute;inset:0;
+    background:radial-gradient(140% 140% at 50% 50%, transparent 70%, rgba(0,0,0,.28) 100%);
+    animation:flicker 6s infinite steps(40);}
+  @keyframes flicker{0%,100%{opacity:1}48%{opacity:.98}50%{opacity:.96}52%{opacity:.99}}
+  #scanbar{position:fixed;left:0;right:0;height:60px;pointer-events:none;z-index:59;
+    background:linear-gradient(to bottom, transparent, rgba(255,60,166,.06), transparent);
+    animation:scan 7s linear infinite;}
+  @keyframes scan{0%{top:-60px}100%{top:100%}}
+
+  #app{min-height:100vh; display:flex; flex-direction:column; transition:transform .05s; position:relative; z-index:2;}
+  #app.shake{animation:shake .4s;}
+  @keyframes shake{0%,100%{transform:translate(0,0)}20%{transform:translate(-8px,4px)}40%{transform:translate(8px,-4px)}60%{transform:translate(-6px,-3px)}80%{transform:translate(6px,3px)}}
+
+  header{display:flex; align-items:center; gap:14px; padding:12px 18px;
+    background:var(--panel); border-bottom:4px solid var(--line); position:sticky; top:0; z-index:5; flex-wrap:wrap; row-gap:8px;}
+  header .logo{font-family:var(--px); font-size:14px; line-height:1.5; color:var(--phos); display:flex; align-items:center; gap:10px; text-shadow:0 0 8px var(--phos);}
+  header .logo .tagline{color:var(--muted);font-size:9px;text-shadow:none;}
+  .pulse{color:var(--bad); font-size:18px; text-shadow:0 0 10px var(--bad); animation:beat 1s infinite; display:inline-block;}
+  @keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.5)}30%{transform:scale(1)}45%{transform:scale(1.3)}}
+  header .spacer{flex:1;}
+
+  .iconbtn,.backbtn,.btn{font-family:var(--px); cursor:pointer; border:none; color:var(--text);
+    background:var(--panel2); box-shadow:var(--bevel), 0 4px 0 #0a0418; transition:transform .06s, box-shadow .06s, background .1s;}
+  .iconbtn{font-size:14px; padding:10px 12px;}
+  .backbtn{font-size:10px; padding:10px 12px; color:var(--phos);}
+  .iconbtn:active,.backbtn:active,.btn:active{transform:translateY(4px); box-shadow:var(--bevel);}
+  .iconbtn:hover,.backbtn:hover{filter:brightness(1.2);}
+
+  main{flex:1; padding:18px 18px 104px; position:relative; z-index:2;}
+  .game{max-width:1040px;margin:0 auto;}
+  .game h2{font-family:var(--px); margin:0 0 10px; font-size:18px; color:var(--quiz); text-shadow:0 0 5px var(--quiz); line-height:1.4;}
+  .game .sub{color:var(--muted);margin:0 0 16px;font-size:20px;line-height:1.4;}
+
+  /* stats + combo */
+  .stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center;}
+  .stat{background:var(--panel);box-shadow:var(--bevel);padding:8px 14px;font-size:19px;color:var(--text);border-left:4px solid var(--line);}
+  .stat b{font-family:var(--px);font-size:14px;color:var(--gold);text-shadow:0 0 3px var(--gold);}
+  .combo{margin-left:auto;display:flex;align-items:center;gap:10px;}
+  .combo .lab{color:var(--muted);font-size:17px;}
+  .multi{font-family:var(--px);font-size:14px;padding:8px 12px;background:var(--gold);color:#3a2400;box-shadow:var(--bevel);}
+  .multi.bump{animation:multibump .5s;}
+  @keyframes multibump{0%{transform:scale(1)}40%{transform:scale(1.5);filter:brightness(1.4)}100%{transform:scale(1)}}
+  .combobar,.progress,.timerbar{background:#120726;box-shadow:var(--bevel);overflow:hidden;}
+  .combobar{width:130px;height:16px;}
+  .combobar > i{display:block;height:100%;width:0;transition:width .3s;
+    background:repeating-linear-gradient(90deg,var(--gold) 0 8px, #c98a00 8px 10px);}
+  .progress{height:16px;margin:0 0 16px;}
+  .progress > i{display:block;height:100%;width:0;transition:width .4s steps(20);
+    background:repeating-linear-gradient(90deg,var(--quiz) 0 8px, #8a1f5a 8px 10px);}
+  .timerbar{height:18px;margin-bottom:14px;}
+  .timerbar > i{display:block;height:100%;width:100%;
+    background:repeating-linear-gradient(90deg,var(--good) 0 10px, #120726 10px 12px);}
+
+  .prompt{background:var(--panel2);box-shadow:var(--bevel),0 0 24px rgba(255,60,166,.3);padding:22px 24px;margin-bottom:18px;font-size:30px;line-height:1.5;border-left:7px solid var(--quiz);color:var(--text);}
+
+  .qtop{text-align:right;margin-bottom:8px;}
+  .qclose{font-family:var(--rt);font-size:16px;background:var(--panel);color:var(--muted);border:none;box-shadow:var(--bevel);padding:8px 12px;cursor:pointer;touch-action:manipulation;}
+  .qclose:hover{color:var(--text);filter:brightness(1.2);}
+  .choices{display:grid;gap:12px;}
+  .choice{font-family:var(--rt);font-size:27px;line-height:1.3;background:var(--panel2);box-shadow:var(--bevel),0 4px 0 #0a0418;padding:18px 20px;cursor:pointer;text-align:left;color:var(--text);border-left:4px solid var(--line);transition:transform .06s,filter .1s,border-color .1s;}
+  .choice:hover{filter:brightness(1.25);}
+  .choice:active{transform:translateY(4px);box-shadow:var(--bevel);}
+  .choice.correct{background:#0a2536;color:var(--good);box-shadow:var(--bevel),0 0 16px var(--good);animation:popcorrect .4s;}
+  .choice.wrong{background:#3a0c12;color:var(--bad);box-shadow:var(--bevel),0 0 16px var(--bad);animation:nudge .3s;}
+  @keyframes popcorrect{0%{transform:scale(1)}40%{transform:scale(1.04)}100%{transform:scale(1)}}
+  @keyframes nudge{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .btn{font-size:13px;padding:14px 20px;background:var(--quiz);color:#02232b;}
+  .btn:hover{filter:brightness(1.15);}
+  .btn.ghost{background:var(--panel2);color:var(--text);}
+
+  .feedback{margin-top:14px;padding:14px 16px;font-size:21px;line-height:1.55;display:none;box-shadow:var(--bevel);}
+  .feedback.show{display:block;animation:fadeup .3s;}
+  @keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .feedback.ok{background:#0a2230;border-left:5px solid var(--good);}
+  .feedback.no{background:#2c0a10;border-left:5px solid var(--bad);}
+  .feedback .term{font-family:var(--px);font-size:13px;color:var(--gold);text-shadow:0 0 2px var(--gold);}
+  .defmain{font-size:20px;line-height:1.45;margin:9px 0 7px;color:var(--text);}
+  .defs{margin-top:12px;display:grid;gap:6px;text-align:left;border-top:1px solid var(--line);padding-top:10px;}
+  .defslabel{font-family:var(--px);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:2px;}
+  .optdef{font-size:16px;line-height:1.35;color:var(--muted);}
+  .optdef b{color:var(--text);}
+  .learnrow{margin:2px 0 8px;font-size:16px;}
+  .learnmore{color:var(--quiz);text-decoration:none;font-family:var(--rt);border-bottom:1px dotted var(--quiz);white-space:nowrap;}
+  .learnmore:hover{filter:brightness(1.25);}
+
+  /* board */
+  .board{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;transition:opacity .25s,filter .25s;}
+  .board.dim{opacity:.32;filter:saturate(.6);}
+  /* phone two-step board: category select -> values */
+  .board.mob{display:grid;grid-template-columns:1fr;gap:8px;}
+  .mcat{display:flex;justify-content:space-between;align-items:center;gap:10px;font-family:var(--rt);font-size:21px;font-weight:bold;background:#2b1240;box-shadow:var(--bevel),0 4px 0 #0a0418;padding:15px 16px;color:var(--phos);cursor:pointer;}
+  .mcat:active{transform:translateY(4px);box-shadow:var(--bevel);}
+  .mcat .mleft{font-family:var(--px);font-size:11px;color:var(--gold);white-space:nowrap;}
+  .mcat.done{opacity:.4;} .mcat.done .mleft{color:var(--muted);}
+  .mvtop{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
+  .mback{font-family:var(--px);font-size:12px;background:var(--panel2);color:var(--text);border:none;box-shadow:var(--bevel),0 4px 0 #0a0418;padding:11px 13px;cursor:pointer;}
+  .mback:active{transform:translateY(4px);box-shadow:var(--bevel);}
+  .mvtitle{font-family:var(--rt);font-size:21px;font-weight:bold;color:var(--phos);}
+  .mvals{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;}
+  .mvals .cell{font-size:18px;padding:24px 2px;}
+  .cat{font-family:var(--rt);font-weight:bold;background:var(--panel);color:var(--phos);box-shadow:var(--bevel);padding:8px 4px;text-align:center;font-size:18px;line-height:1.1;min-height:48px;display:flex;align-items:center;justify-content:center;text-shadow:0 0 2px var(--phos);}
+  .cell{position:relative;font-family:var(--px);background:#2b1240;box-shadow:var(--bevel),0 4px 0 #0a0418;padding:18px 4px;text-align:center;font-size:16px;color:var(--gold);cursor:pointer;transition:transform .1s,filter .1s;opacity:0;transform:scale(.5);text-shadow:none;}
+  .cell.in{animation:cellin .4s forwards;}
+  @keyframes cellin{to{opacity:1;transform:scale(1);}}
+  .cell:hover{filter:brightness(1.3);}
+  .cell:active{transform:translateY(4px);box-shadow:var(--bevel);}
+  .cell.bonus{background:#5a1577;color:#fff;box-shadow:var(--bevel),0 4px 0 #0a0418,0 0 16px var(--purple);}
+  .cell.bonus::after{content:"⚡";position:absolute;top:2px;right:5px;font-size:12px;}
+  .cell.flip{animation:flip .35s;}
+  @keyframes flip{0%{transform:rotateY(0)}50%{transform:rotateY(90deg) scale(1.1)}100%{transform:rotateY(0)}}
+  .cell.used{background:#1a0e26;color:var(--muted);cursor:default;filter:none;opacity:.35;box-shadow:var(--bevel);text-shadow:none;}
+  .cell.used:hover{transform:none;filter:none;}
+
+  .bonusbanner{font-family:var(--px);text-align:center;font-size:16px;color:var(--purple);margin-bottom:12px;animation:bonusflash .8s;text-shadow:0 0 18px var(--purple);}
+  @keyframes bonusflash{0%{transform:scale(.4);opacity:0}40%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
+
+  /* results */
+  .done-screen{text-align:center;padding:14px;}
+  .rank-badge{font-family:var(--px);font-size:22px;margin:10px 0;line-height:1.5;animation:badgein .7s cubic-bezier(.2,1.3,.4,1);}
+  @keyframes badgein{0%{transform:scale(0) rotate(-20deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+  .done-screen .big{font-family:var(--px);font-size:40px;color:var(--gold);text-shadow:0 0 24px var(--gold);margin:8px 0;}
+  .donestats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:16px 0;}
+  .reviewlist{text-align:left;max-width:620px;margin:0 auto;display:grid;gap:10px;}
+  /* splash / intro screen */
+  .splash{max-width:680px;margin:0 auto;text-align:center;padding-top:6px;animation:reportin .5s cubic-bezier(.2,1.2,.4,1);}
+  .splash-bots{display:flex;gap:26px;justify-content:center;margin-bottom:4px;}
+  .splash-bots .repbot{display:inline-block;animation:docbob 3s ease-in-out infinite;}
+  .splash-bots .repbot:last-child{animation-delay:.6s;}
+  .splash-bots .repface{width:92px;}
+  .splash-title{font-family:var(--px);font-size:30px;color:var(--quiz);text-shadow:0 0 12px var(--quiz);margin:8px 0;line-height:1.35;}
+  .splash-sub{color:var(--muted);font-size:19px;margin:0 0 18px;line-height:1.4;}
+  .splash-card{background:var(--panel2);box-shadow:var(--bevel);padding:16px 18px;text-align:left;display:grid;gap:11px;font-size:20px;line-height:1.4;max-width:580px;margin:0 auto 18px;}
+  .splash-card p{margin:0;}
+  .splash-card b{color:var(--gold);}
+  .splash-ask{font-family:var(--px);font-size:15px;color:var(--good);margin:8px 0 16px;text-shadow:0 0 6px var(--good);}
+  .splash-go{font-size:22px;padding:16px 44px;animation:gopulse 1.3s ease-in-out infinite;}
+  @keyframes gopulse{0%,100%{transform:translateY(0);filter:drop-shadow(0 0 4px var(--quiz))}50%{transform:translateY(-3px);filter:drop-shadow(0 0 18px var(--quiz))}}
+
+  .splash-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  /* leaderboard */
+  .lblist{max-width:520px;margin:0 auto;display:grid;gap:6px;}
+  .lbrow{display:grid;grid-template-columns:36px 1fr auto auto;gap:10px;align-items:center;background:var(--panel2);box-shadow:var(--bevel);padding:10px 12px;font-size:19px;}
+  .lbrank{font-family:var(--px);font-size:13px;color:var(--gold);text-align:center;}
+  .lbname{font-weight:bold;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .lbscore{font-family:var(--px);font-size:13px;color:var(--quiz);}
+  .lbcorrect{font-size:15px;color:var(--muted);}
+  .lbrow.me{box-shadow:var(--bevel),0 0 14px var(--good);outline:2px solid var(--good);}
+  .lbentry{background:var(--panel2);box-shadow:var(--bevel),0 0 16px rgba(255,212,94,.28);padding:14px;margin:0 auto 18px;max-width:540px;}
+  .lbentry-t{font-size:18px;line-height:1.4;margin-bottom:12px;text-align:center;}
+  .lbentry-t b{color:var(--gold);}
+  .lbentry .lbsubmit{margin-top:0;}
+  .lbdone{font-family:var(--px);font-size:13px;color:var(--good);text-align:center;margin:0 auto 14px;}
+  .lbdone b{color:var(--gold);}
+  .lbsubmit{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;align-items:center;margin-top:20px;}
+  input,textarea{-webkit-user-select:text;user-select:text;}
+  #lbName{font-family:var(--rt);font-size:20px;padding:12px 14px;background:#0c0518;color:var(--text);border:none;box-shadow:var(--bevel);width:190px;text-transform:uppercase;letter-spacing:1px;-webkit-user-select:text;user-select:text;pointer-events:auto;touch-action:manipulation;}
+  #lbName::placeholder{color:var(--muted);}
+
+  .rounds{margin-top:22px;}
+  .rounds-head{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:16px;flex-wrap:wrap;}
+  .rounds-cap{font-family:var(--px);font-size:12px;color:var(--muted);text-align:left;line-height:1.6;max-width:380px;}
+  .rounds-cap span{font-family:var(--rt);font-size:18px;color:var(--text);}
+  .review{background:var(--panel2);box-shadow:var(--bevel);padding:12px 14px;margin-bottom:10px;text-align:left;}
+  .rev-term{font-family:var(--px);font-size:14px;color:var(--gold);text-shadow:0 0 4px var(--gold);}
+  .rev-def{font-size:20px;color:var(--text);margin:8px 0 7px;line-height:1.4;}
+  .rev-why{font-size:19px;color:var(--good);line-height:1.5;}
+  .rev-why b{font-family:var(--px);font-size:9px;color:var(--quiz);margin-right:8px;letter-spacing:.5px;}
+  .report{background:var(--panel2);box-shadow:var(--bevel),0 0 24px rgba(255,212,94,.22);padding:18px;margin:0 auto 22px;max-width:680px;text-align:left;animation:reportin .55s cubic-bezier(.2,1.2,.4,1);}
+  @keyframes reportin{0%{opacity:0;transform:scale(.85) translateY(24px)}100%{opacity:1;transform:none}}
+  .rep-title{font-family:var(--px);font-size:12px;color:var(--muted);margin-bottom:14px;letter-spacing:2px;text-align:center;}
+  .verdict{font-family:var(--px);font-size:24px;line-height:1.4;text-align:center;padding:16px;margin-bottom:12px;box-shadow:var(--bevel);animation:verdpulse 1.5s ease-in-out infinite;}
+  @keyframes verdpulse{0%,100%{filter:drop-shadow(0 0 3px currentColor)}50%{filter:drop-shadow(0 0 18px currentColor)}}
+  .verdict.perfect,.verdict.saved{color:var(--good);}
+  .verdict.stable{color:var(--gold);}
+  .verdict.critical{color:var(--bad);}
+  .diagnosis{font-family:var(--rt);font-size:22px;text-align:center;background:#0c0518;box-shadow:var(--bevel);padding:13px 14px;margin-bottom:16px;line-height:1.4;color:var(--muted);}
+  .diagnosis b{display:inline-block;margin-top:6px;font-family:var(--px);font-size:15px;line-height:1.7;color:var(--gold);text-shadow:0 0 8px var(--gold);}
+  .rep-line{display:flex;gap:12px;align-items:center;margin-bottom:12px;opacity:0;animation:repline .5s ease forwards;}
+  @keyframes repline{0%{opacity:0;transform:translateX(-14px)}100%{opacity:1;transform:none}}
+  .repbot{flex:0 0 auto;}
+  .repface{width:58px;height:auto;display:block;image-rendering:pixelated;filter:drop-shadow(0 0 3px var(--neon));}
+  .rep-bubble{background:var(--panel);box-shadow:var(--bevel);padding:11px 13px;font-size:20px;line-height:1.35;flex:1;}
+  .rep-bubble b{font-family:var(--px);font-size:11px;}
+  .rep-bubble.m b{color:#ff3ca6;} .rep-bubble.c b{color:#2ad4ff;}
+
+  .floatpop{position:fixed;pointer-events:none;font-family:var(--px);font-size:18px;z-index:50;text-shadow:0 0 10px currentColor;animation:floatup 1s forwards;}
+  .wordzoom{position:fixed;left:50%;top:42%;z-index:52;pointer-events:none;font-family:var(--rt);font-weight:bold;font-size:46px;line-height:1.1;text-align:center;max-width:92vw;color:var(--good);text-shadow:0 0 22px var(--good);opacity:0;}
+  .wordzoom.go{animation:wordzoomk 1.05s cubic-bezier(.2,.7,.3,1) forwards;}
+  @keyframes wordzoomk{0%{opacity:0;transform:translate(-50%,-50%) scale(.45);}18%{opacity:1;transform:translate(-50%,-50%) scale(1.05);}100%{opacity:0;transform:translate(-50%,-50%) scale(2.7);}}
+  @keyframes floatup{0%{transform:translateY(0) scale(.6);opacity:0}20%{transform:translateY(-8px) scale(1.1);opacity:1}100%{transform:translateY(-70px) scale(1);opacity:0}}
+
+  /* ===== cyberpunk medics ===== */
+  .doc{position:fixed;bottom:30px;width:150px;z-index:3;pointer-events:none;--neon:#ff3ca6;transform-origin:bottom center;animation:docbob 3.4s ease-in-out infinite;transition:left .35s ease,right .35s ease;}
+  .doc.left{left:40px;}
+  .doc.right{right:40px;--neon:#2ad4ff;animation-delay:.7s;}
+  .doc.tuck.left{left:-52px;}    /* slide out of the way while a question is open */
+  .doc.tuck.right{right:-52px;}
+  .doc.right .docsvg{transform:scaleX(-1);}
+  .docsvg{width:100%;height:auto;display:block;filter:drop-shadow(0 0 3px var(--neon));}
+  .emo{position:absolute;top:-12px;left:50%;font-size:32px;opacity:0;pointer-events:none;line-height:1;filter:drop-shadow(0 0 4px rgba(0,0,0,.5));}
+  .emo.show{animation:emopop 1.2s ease;}
+  @keyframes emopop{0%{opacity:0;transform:translate(-50%,8px) scale(.3)}18%{opacity:1;transform:translate(-50%,-4px) scale(1.3)}70%{opacity:1;transform:translate(-50%,-16px) scale(1)}100%{opacity:0;transform:translate(-50%,-34px) scale(1)}}
+  .coat{fill:#eaf0ff;} .metal{fill:#241d38;} .mask{fill:#3a2f57;} .glove{fill:#2a2440;}
+  .ol{stroke:var(--neon);stroke-width:2;stroke-linejoin:round;stroke-linecap:round;}
+  .nofill{fill:none;}
+  .neonfill,.visor,.emblem{fill:var(--neon);}
+  .led{fill:var(--gold);animation:vled 1.2s infinite;}
+  .seam,.vent,.steth{opacity:.7;}
+  .joint{fill:#e4e8f2;stroke:#aeb6c8;stroke-width:1.5;}
+  .arm{fill:none;stroke:#cfd5e2;stroke-width:5;stroke-linecap:round;}
+  .spring{fill:none;stroke:#aeb6c8;stroke-width:2.5;}
+  .gloss{fill:rgba(255,255,255,.4);}
+  .cross{fill:#ff3b3b;}
+  .pixg{fill:#cfd5e2;}
+  .mp{fill:#20142e;}
+  .scr{fill:#141021;}
+  .clip{fill:#caa24a;}
+  .eyeshine{fill:#ffffff;}
+  .blush{fill:#ff8fb0;opacity:.9;}
+  .mo{display:none;}
+  .sweat{fill:#7fd4ff;display:none;transform-box:fill-box;transform-origin:center;}
+  .armR{transform-box:fill-box;transform-origin:80% 0;transition:transform .25s ease;}
+  .armL{transform-box:fill-box;transform-origin:50% 0;transition:transform .25s ease;}
+  .visor{transform-box:fill-box;transform-origin:center;animation:vblink 4s infinite;}
+  .doc.right .visor{animation-delay:1.3s;}
+  .emblem{animation:empulse 1.6s infinite;}
+  @keyframes docbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  @keyframes vblink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.12)}}
+  @keyframes vled{0%,100%{opacity:1}50%{opacity:.2}}
+  @keyframes empulse{0%,100%{opacity:.75}50%{opacity:1}}
+  /* mood reflects the patient's health */
+  .doc.mood-happy{animation:dochappy 2.4s ease-in-out infinite;}
+  .doc.mood-ok{animation:docbob 3.4s ease-in-out infinite;}
+  .doc.mood-worried{animation:docworry 1.3s ease-in-out infinite;}
+  .doc.mood-critical{animation:docpanic .5s ease-in-out infinite;}
+  @keyframes dochappy{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+  @keyframes docworry{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-3px) rotate(1.5deg)}}
+  @keyframes docpanic{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+  .doc.mood-worried .visor{fill:var(--gold);}
+  .doc.mood-critical .visor{fill:var(--bad);animation:eyepanic .6s infinite;}
+  @keyframes eyepanic{0%,100%{opacity:1}50%{opacity:.4}}
+  .doc.mood-happy .mo-happy,.doc.mood-ok .mo-ok,.doc.mood-worried .mo-worried,.doc.mood-critical .mo-crit{display:block;}
+  .doc.mood-worried .sweat,.doc.mood-critical .sweat{display:block;animation:drip 1.7s infinite;}
+  @keyframes drip{0%{transform:translateY(0);opacity:0}20%{opacity:1}100%{transform:translateY(11px);opacity:0}}
+
+  .doc.react-good{animation:dochop .5s 2;}
+  .doc.react-combo{animation:dochop .42s 3;}
+  .doc.react-bonus{animation:dochop .36s 4;}
+  .doc.react-win{animation:dochop .5s 6;}
+  .doc.react-bad{animation:docshake .4s 2;}
+  @keyframes dochop{0%{transform:translateY(0) scale(1)}30%{transform:translateY(-20px) scale(1.22)}60%{transform:translateY(0) scale(1.08)}100%{transform:translateY(0) scale(1)}}
+  @keyframes docshake{0%,100%{transform:translateX(0) scale(1)}20%{transform:translateX(-8px) scale(1.12)}60%{transform:translateX(8px) scale(1.12)}}
+  .doc.react-good .armR,.doc.react-combo .armR,.doc.react-bonus .armR,.doc.react-win .armR{animation:armwave .5s ease 2;}
+  @keyframes armwave{0%{transform:rotate(0)}25%{transform:rotate(-60deg)}50%{transform:rotate(-40deg)}75%{transform:rotate(-60deg)}100%{transform:rotate(-46deg)}}
+  .doc.react-bad .armR{animation:armflail .22s ease 3;}
+  @keyframes armflail{0%{transform:rotate(0)}50%{transform:rotate(-16deg)}100%{transform:rotate(0)}}
+  .doc.react-win .armL,.doc.react-bonus .armL{animation:armwaveL .5s ease 2;}
+  @keyframes armwaveL{0%{transform:rotate(0)}25%{transform:rotate(52deg)}50%{transform:rotate(34deg)}75%{transform:rotate(52deg)}100%{transform:rotate(42deg)}}
+  .doc.react-good .visor{fill:#fff;}
+  .doc.react-combo .visor,.doc.react-bonus .visor,.doc.react-win .visor{fill:var(--gold);}
+  .doc.react-bad .visor{fill:var(--bad);}
+  /* combo power-up aura (grows/pulses with streak; reaction glows below still override briefly) */
+  .doc.aura1 .docsvg{filter:drop-shadow(0 0 7px var(--neon));}
+  .doc.aura2 .docsvg{filter:drop-shadow(0 0 12px var(--neon));animation:aura 1.3s ease-in-out infinite;}
+  .doc.aura3 .docsvg{filter:drop-shadow(0 0 18px var(--neon));animation:aura .7s ease-in-out infinite;}
+  @keyframes aura{0%,100%{filter:drop-shadow(0 0 8px var(--neon))}50%{filter:drop-shadow(0 0 22px var(--neon))}}
+  .doc.react-good .docsvg{filter:drop-shadow(0 0 9px #fff);}
+  .doc.react-bad .docsvg{filter:drop-shadow(0 0 7px var(--bad));}
+  .doc.react-combo .docsvg,.doc.react-bonus .docsvg,.doc.react-win .docsvg{filter:drop-shadow(0 0 9px var(--gold));}
+  /* heart/star eyes, clipboard stamp, antennae droop, fist-bump lean, victory dance, roll-in, defib zap */
+  .eyeicon{display:none;}
+  .doc.react-good .eyeheart,.doc.react-combo .eyeheart,.doc.react-win .eyeheart{display:block;}
+  .doc.react-bonus .eyestar{display:block;}
+  .doc.react-good .visor,.doc.react-combo .visor,.doc.react-win .visor,.doc.react-bonus .visor{opacity:0;}
+  .doc.react-good .eyeshine,.doc.react-combo .eyeshine,.doc.react-win .eyeshine,.doc.react-bonus .eyeshine{opacity:0;}
+  .stamp{display:none;fill:#39ff14;transform-box:fill-box;transform-origin:center;}
+  .doc.react-good .stamp,.doc.react-combo .stamp,.doc.react-win .stamp{display:block;animation:stampin .45s;}
+  @keyframes stampin{0%{opacity:0;transform:scale(2.2) rotate(-14deg)}55%{opacity:1;transform:scale(.85) rotate(4deg)}100%{transform:scale(1) rotate(0)}}
+  .ant{transform-box:fill-box;transform-origin:50% 100%;transition:transform .35s;}
+  .doc.mood-worried .antL{transform:rotate(14deg);} .doc.mood-worried .antR{transform:rotate(-14deg);}
+  .doc.mood-critical .antL{transform:rotate(32deg);} .doc.mood-critical .antR{transform:rotate(-32deg);}
+  .doc.mood-critical .visor{animation:slowblink 2.4s infinite;}
+  @keyframes slowblink{0%,38%,100%{transform:scaleY(1)}44%,54%{transform:scaleY(.12)}}
+  .doc.left.cheer{animation:leanR .55s ease;} .doc.right.cheer{animation:leanL .55s ease;}
+  @keyframes leanR{0%,100%{transform:translateX(0) rotate(0)}45%{transform:translateX(34px) rotate(9deg)}}
+  @keyframes leanL{0%,100%{transform:translateX(0) rotate(0)}45%{transform:translateX(-34px) rotate(-9deg)}}
+  .doc.dance{animation:dance .55s ease-in-out infinite;}
+  @keyframes dance{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-9px) rotate(5deg)}}
+  .doc.left.rollin{animation:rollinL .65s ease-out;} .doc.right.rollin{animation:rollinR .65s ease-out;}
+  @keyframes rollinL{0%{transform:translateX(-210px) rotate(-540deg)}100%{transform:translateX(0) rotate(0)}}
+  @keyframes rollinR{0%{transform:translateX(210px) rotate(540deg)}100%{transform:translateX(0) rotate(0)}}
+  .doc.zap{animation:zapfx .12s 5;}
+  @keyframes zapfx{0%,100%{filter:none}50%{filter:drop-shadow(0 0 22px #fff) brightness(1.8)}}
+  .bubble{position:fixed;z-index:7;bottom:300px;font-family:var(--rt);font-size:18px;line-height:1.3;padding:9px 11px;max-width:210px;text-align:center;background:var(--panel2);color:var(--text);box-shadow:var(--bevel),0 4px 0 #0a0418;opacity:0;pointer-events:none;transition:opacity .35s;}
+  .bubbleL{left:18px;} .bubbleR{right:18px;}
+  .bubble.show{opacity:1;animation:bubin .3s;}
+  @keyframes bubin{0%{opacity:0;transform:translateY(10px) scale(.7)}100%{opacity:1;transform:none}}
+  .bubble.good{color:var(--good);} .bubble.bad{color:var(--bad);}
+  .bubble.combo,.bubble.bonus{color:var(--gold);} .bubble.win,.bubble.lose{color:var(--purple);}
+  /* ---- responsive: tablets & phones ---- */
+  /* (responsive @media blocks live at the END of this stylesheet so they override base rules) */
+
+  /* ===== patient ===== */
+  #patient{display:flex;align-items:center;justify-content:center;gap:14px;background:var(--panel);box-shadow:var(--bevel),0 0 16px rgba(42,212,255,.18);padding:9px 16px;border-left:5px solid var(--good);margin:0 auto 16px;width:max-content;max-width:100%;}
+  #patient:empty{display:none;}
+  #patient.codeblue{animation:cbflash .5s infinite;}
+  @keyframes cbflash{0%,100%{filter:none}50%{filter:drop-shadow(0 0 14px var(--bad));}}
+  .pscreen{width:58px;height:58px;background:#0c0518;box-shadow:var(--bevel);display:flex;align-items:center;justify-content:center;}
+  .pface{width:54px;height:54px;display:block;}
+  .phead{fill:#f2c79c;stroke:#20142e;stroke-width:2;}
+  .phair{fill:#3a2f57;}
+  .e-n{fill:#20142e;}
+  .m-n,.m-h,.e-h,.m-x,.e-x line,.bx{fill:none;stroke:#20142e;stroke-width:2.4;stroke-linecap:round;}
+  .cheek{fill:#ff8fb0;}
+  .bandage rect{fill:#ffe6b0;stroke:#caa24a;stroke-width:1;}
+  .bx{stroke:#caa24a;stroke-width:1.6;}
+  .e-h,.m-h,.cheek,.e-x,.m-x,.bandage{display:none;}
+  #patient.heal .e-n,#patient.heal .m-n{display:none;}
+  #patient.heal .e-h,#patient.heal .m-h,#patient.heal .cheek{display:block;}
+  #patient.hurt .e-n,#patient.hurt .m-n{display:none;}
+  #patient.hurt .e-x,#patient.hurt .m-x,#patient.hurt .bandage{display:block;}
+  #patient.heal .pface{animation:pbounce .5s 2;}
+  #patient.hurt .pface{animation:pwobble .4s 2;transform-box:fill-box;transform-origin:center;}
+  @keyframes pbounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+  @keyframes pwobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-9deg)}75%{transform:rotate(9deg)}}
+  .pinfo{font-family:var(--px);}
+  .plabel{font-size:9px;color:var(--muted);margin-bottom:6px;letter-spacing:1px;}
+  .phpbar{width:150px;height:14px;background:#120726;box-shadow:var(--bevel);overflow:hidden;}
+  .phpbar > i{display:block;height:100%;width:100%;background:var(--good);transition:width .45s,background .45s;}
+  .pstatus{font-size:10px;margin-top:6px;color:var(--good);}
+  #vflash{position:fixed;inset:0;pointer-events:none;z-index:45;opacity:0;background:#ff3b3b;}
+  #vflash.go{animation:vflashk 1s;}
+  @keyframes vflashk{0%{opacity:0}12%{opacity:.30}100%{opacity:0}}
+  /* mobile dialogue ticker (bots' banter where speech bubbles don't fit) */
+  #ticker{display:none;position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:580px;bottom:96px;z-index:8;background:var(--panel2);box-shadow:var(--bevel),0 0 18px rgba(255,212,94,.3);padding:10px 13px;font-family:var(--rt);font-size:17px;line-height:1.35;text-align:left;pointer-events:none;color:var(--text);opacity:0;transition:opacity .3s;}
+  #ticker.on{opacity:1;animation:tickin .35s;}
+  #ticker .tk-line{margin:2px 0;}
+  #ticker b{font-family:var(--px);font-size:11px;margin-right:7px;}
+  @keyframes tickin{0%{opacity:0;transform:translate(-50%,-12px)}100%{opacity:1;transform:translateX(-50%)}}
+  /* #patient is repositioned (not hidden) for small screens in the responsive block below */
+
+  /* pixel cyberpunk hospital skyline (behind everything, dim) */
+  #city{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;overflow:hidden;}
+  .citysvg{position:absolute;left:0;right:0;bottom:0;width:100%;height:64vh;display:block;}
+  #city .hcross{fill:#ff4d5e;filter:drop-shadow(0 0 7px #ff3b3b);}
+  /* synthwave neon grid floor (static — behind everything; the bots stand on it) */
+  #grid{position:fixed;left:0;right:0;bottom:0;height:46vh;z-index:0;pointer-events:none;overflow:hidden;perspective:280px;opacity:.45;}
+  #grid::before{content:"";position:absolute;left:-50%;right:-50%;top:0;bottom:-2px;
+    background-image:linear-gradient(rgba(255,60,166,.4) 1.5px,transparent 1.5px),linear-gradient(90deg,rgba(130,90,210,.32) 1.5px,transparent 1.5px);
+    background-size:46px 46px;transform:rotateX(75deg);transform-origin:bottom center;}
+  /* chromatic-aberration glow on titles */
+  .splash-title{animation:glitch 5s infinite;}
+  @keyframes glitch{
+    0%,90%,100%{text-shadow:0 0 12px var(--quiz),3px 0 rgba(255,60,166,.5),-3px 0 rgba(42,212,255,.5);transform:translate(0);}
+    92%{text-shadow:0 0 12px var(--quiz),-5px 0 rgba(255,60,166,.8),5px 0 rgba(42,212,255,.8);transform:translate(-2px,0);}
+    94%{transform:translate(2px,0);}
+    96%{text-shadow:0 0 12px var(--quiz),4px 0 rgba(255,60,166,.7),-4px 0 rgba(42,212,255,.7);transform:translate(-1px,0);}
+  }
+  .game h2{text-shadow:0 0 6px var(--quiz),2px 0 rgba(255,60,166,.4),-2px 0 rgba(42,212,255,.4);}
+  header .logo{text-shadow:0 0 8px var(--phos),2px 0 rgba(255,60,166,.4),-2px 0 rgba(42,212,255,.35);}
+
+  #city,#grid{transition:opacity .8s ease;}                       /* backdrop shows at the start... */
+  body.playing #city, body.playing #grid{opacity:0;}              /* ...then fades out once you open the first question */
+  #fx{position:fixed;inset:0;pointer-events:none;z-index:40;}
+  footer{font-family:var(--rt);padding:10px 18px;text-align:center;color:var(--muted);font-size:17px;border-top:4px solid var(--line);position:relative;z-index:2;}
+  ::-webkit-scrollbar{width:12px;height:12px;}
+  ::-webkit-scrollbar-thumb{background:var(--line);}
+  ::-webkit-scrollbar-track{background:var(--panel);}
+
+  /* ===== RESPONSIVE (kept last so these override the base rules above) ===== */
+  @media(max-width:1240px){
+    .bubble{display:none;}                 /* no room for bubbles; the ticker shows the banter */
+    #ticker{display:block;top:54px;bottom:auto;}
+    .emo{font-size:24px;top:-8px;}
+    .doc{width:88px;bottom:6px;}
+    .doc.left{left:4px;} .doc.right{right:4px;}
+    #patient{bottom:8px;}
+    main{padding-bottom:130px;}
+  }
+  @media(max-width:600px){
+    body{font-size:18px;letter-spacing:0;}
+    header{padding:8px 10px;gap:7px;}
+    header .logo{font-size:11px;gap:6px;}
+    header .tagline{display:none;}
+    .iconbtn,.backbtn{font-size:0;padding:9px 10px;}        /* icon-only on phone — hide the long labels */
+    #timerBtn::before{content:"⏱";font-size:16px;line-height:1;}
+    #muteBtn::before{content:"🔊";font-size:14px;line-height:1;}
+    #muteBtn.btn-off::before{content:"🔇";}
+    #restartBtn::before{content:"↻";font-size:14px;line-height:1;color:var(--phos);}
+    .iconbtn.btn-off::before{opacity:.4;}                   /* dim the icon when that mode is OFF */
+    main{padding:12px 10px 110px;}
+    #ticker{font-size:14px;top:48px;bottom:auto;padding:6px 10px;max-width:none;width:calc(100% - 12px);
+            box-shadow:var(--bevel),0 0 10px rgba(255,212,94,.18);line-height:1.25;}
+    #ticker b{font-size:9px;margin-right:5px;}
+    .game.play{display:flex;flex-direction:column;}         /* lets the HP bar sit right under the score */
+    .game.play h2{display:none;}                            /* the header already reads MUSCLE QUIZ: STAT! */
+    .game.play .sub{order:0;font-size:14px;margin:0 0 9px;line-height:1.3;}
+    .game.play .stats{order:1;} .game.play #patient{order:2;}
+    .game.play .progress{order:3;} .game.play .board{order:4;} .game.play #qArea{order:5;}
+    .game h2{font-size:13px;}                                /* other screens keep a visible title */
+    .game .sub{font-size:15px;}
+    .splash-title{font-size:19px;}
+    .splash-sub{font-size:16px;}
+    .splash-card{font-size:17px;gap:9px;padding:13px 14px;}
+    .splash-bots .repface{width:66px;}
+    .splash-ask{font-size:12px;}
+    .splash-go{font-size:18px;padding:14px 34px;}
+    .stats{gap:6px;margin-bottom:8px;align-items:center;}
+    .stat{font-size:12px;padding:4px 7px;border-left-width:3px;} .stat b{font-size:11px;}
+    .combo{margin-left:auto;width:auto;gap:6px;justify-content:flex-end;}
+    .combo .lab{display:none;}                              /* the bar + multiplier are self-explanatory */
+    .combobar{width:52px;height:12px;}
+    .multi{font-size:11px;padding:4px 7px;}
+    .progress{height:10px;margin:0 0 9px;}
+    .board{gap:4px;}
+    .cat{font-size:10px;min-height:34px;padding:4px 1px;line-height:1.05;}
+    .cell{font-size:13px;padding:12px 1px;}
+    .prompt{font-size:21px;padding:15px;}
+    .choice{font-size:21px;padding:15px;}
+    .feedback{font-size:16px;}
+    .doc{width:54px;}
+    .doc.left{left:2px;} .doc.right{right:2px;}
+    #patient{gap:8px;padding:5px 10px;width:100%;max-width:none;margin:0 0 9px;
+             justify-content:flex-start;border-left-width:3px;}
+    #patient::before{content:"♥";color:var(--bad);font-size:14px;line-height:1;text-shadow:0 0 7px var(--bad);}
+    .pscreen,.plabel,.pstatus{display:none;}                /* slim HP strip: drop the face + labels on phone */
+    .pinfo{flex:1;}
+    .phpbar{width:100%;height:12px;}
+    .verdict{font-size:16px;padding:12px;}
+    .diagnosis{font-size:18px;} .diagnosis b{font-size:12px;}
+    .rep-bubble{font-size:16px;padding:9px 10px;} .rep-bubble b{font-size:10px;}
+    .repface{width:46px;}
+    .rep-title{font-size:10px;}
+    .done-screen .big{font-size:30px;}
+    .rank-badge{font-size:15px;}
+  }
+</style>
+</head>
+<body>
+<div id="city"></div>
+<div id="grid"></div>
+<canvas id="fx"></canvas>
+<div id="scanbar"></div>
+<div id="vflash"></div>
+<div class="doc left" id="docL"></div>
+<div class="doc right" id="docR"></div>
+<div class="bubble bubbleL" id="bubL"></div>
+<div class="bubble bubbleR" id="bubR"></div>
+<div id="ticker"></div>
+<div id="crt"></div>
+<div id="app">
+  <header>
+    <div class="logo"><span class="pulse">♥</span> MUSCLE QUIZ: STAT! <span class="tagline">MUSCLES·TISSUE·LANDMARKS</span></div>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="timerBtn" title="Timed mode on/off">⏱ TIMED MODE ON</button>
+    <button class="iconbtn" id="muteBtn" title="Sound on/off">SND</button>
+    <button class="backbtn hidden" id="restartBtn">↻ NEW</button>
+  </header>
+  <main id="main"></main>
+</div>
+
+<script>
+/* ============================================================
+   LEADERBOARD STORAGE
+   - Default: scores save to THIS DEVICE (localStorage).
+   - GLOBAL board: paste a Supabase Project URL + anon key below
+     (free project, browser-writable with proper CORS). See README for SQL.
+   (jsonblob was tried but sends no CORS headers, so browsers can't use it.)
+   ============================================================ */
+const LB = {
+  blob:    "",                                   // unused
+  url:     "https://fyzpazpjxbdzeaygdrat.supabase.co",       // Supabase Project URL
+  anonKey: "sb_publishable_Cvf3YkaBScfJW7Avmzr0pA_enhOxyvN", // Supabase publishable/anon key (safe to expose)
+  table:   "muscle_scores"
+};
+
+/* ===================== TERM DEFINITIONS ===================== */
+const TERMS = {
+  /* --- Muscle Tissue --- */
+  "skeletal muscle fiber":"A single, long, multinucleated muscle cell — the basic unit of skeletal muscle.",
+  "myofibrils":"Long contractile rods that fill the fiber, made of repeating sarcomeres (actin & myosin).",
+  "sarcomere":"The functional contractile unit of muscle, running from one Z-disc to the next.",
+  "sarcolemma":"The plasma membrane of a muscle fiber.",
+  "sarcoplasm":"The cytoplasm of a muscle fiber — rich in glycogen and myoglobin.",
+  "t-tubules":"Inward folds of the sarcolemma that carry the action potential deep into the fiber.",
+  "sarcoplasmic reticulum":"Specialized smooth ER that stores and releases the calcium that triggers contraction.",
+  "nucleus":"The cell's control center; skeletal fibers have many, just under the sarcolemma.",
+  "mitochondria":"Organelles that make the ATP that powers muscle contraction.",
+  /* --- Facial Muscles --- */
+  "occipitalis":"Posterior belly of the occipitofrontalis; pulls the scalp backward.",
+  "frontalis":"Anterior belly of the occipitofrontalis; raises the eyebrows and wrinkles the forehead.",
+  "orbicularis oculi":"Ring muscle around the eye; closes the eyelids (blinking, squinting).",
+  "nasalis":"Muscle over the bridge of the nose; flares and compresses the nostrils.",
+  "zygomaticus major":"Draws the corner of the mouth up and back — the main smiling muscle.",
+  "zygomaticus minor":"Elevates the upper lip; assists smiling and expressions of sadness.",
+  "masseter":"Powerful chewing muscle that elevates the mandible (closes the jaw).",
+  "buccinator":"Cheek muscle that compresses the cheek to keep food between the teeth.",
+  "orbicularis oris":"Ring muscle around the mouth; closes and purses the lips (kissing, whistling).",
+  "depressor anguli oris":"Pulls the corner of the mouth downward — the frowning muscle.",
+  "risorius":"Retracts the corner of the mouth laterally (grimacing).",
+  "mentalis":"Elevates and protrudes the lower lip and wrinkles the chin (pouting).",
+  "temporalis":"Fan-shaped chewing muscle that elevates and retracts the mandible.",
+  /* --- Extrinsic Eye Muscles --- */
+  "inferior oblique":"Elevates the eye and turns it laterally (looks up-and-out).",
+  "superior oblique":"Depresses the eye and turns it laterally (down-and-out); runs through the trochlea.",
+  "medial rectus":"Adducts the eye — turns it medially, toward the nose.",
+  "lateral rectus":"Abducts the eye — turns it laterally, away from the nose.",
+  "superior rectus":"Elevates the eye (and adducts it) — looks up.",
+  "inferior rectus":"Depresses the eye (and adducts it) — looks down.",
+  /* --- Chest & Breathing --- */
+  "pectoralis major":"Large fan-shaped chest muscle. O: clavicle, sternum & costal cartilages 1–6. I: greater tubercle / intertubercular groove of the humerus. A: flexes, adducts & medially rotates the arm.",
+  "pectoralis minor":"Small muscle deep to pec major. O: ribs 3–5. I: coracoid process of the scapula. A: depresses & protracts the scapula (elevates ribs in forced inspiration).",
+  "diaphragm":"Dome-shaped primary muscle of breathing; flattens to draw air into the lungs.",
+  "external intercostals":"Muscles between the ribs that elevate the rib cage during inspiration.",
+  "internal intercostals":"Muscles between the ribs that depress the rib cage during forced expiration.",
+  "innermost intercostals":"The deepest intercostal layer; assists the internal intercostals.",
+  "serratus anterior":"Lateral rib-cage muscle that protracts the scapula and holds it to the chest wall ('boxer's muscle').",
+  /* --- Abdomen & Back --- */
+  "external oblique":"Outermost flat abdominal muscle; fibers run down-and-medial; flexes/rotates the trunk and compresses the abdomen.",
+  "internal oblique":"Middle flat abdominal muscle; fibers run up-and-medial (perpendicular to the external oblique).",
+  "transverse abdominis":"Deepest abdominal muscle; horizontal fibers compress the abdomen like a corset.",
+  "rectus abdominis":"The 'six-pack' muscle. O: pubic crest & symphysis. I: xiphoid process & costal cartilages 5–7. A: flexes the vertebral column (trunk) and compresses the abdomen.",
+  "latissimus dorsi":"Broad back muscle. O: spinous processes T7–L5, thoracolumbar fascia, iliac crest & lower ribs. I: intertubercular groove of the humerus. A: extends, adducts & medially rotates the arm.",
+  /* --- Neck & Landmarks --- */
+  "sternocleidomastoid":"Strap muscle of the neck. O: manubrium of the sternum & medial clavicle. I: mastoid process of the temporal bone. A: both sides flex the neck; one side rotates the head to the opposite side and tilts it.",
+  "trapezius":"Large kite-shaped neck/back muscle. O: occipital bone, nuchal ligament & spinous processes C7–T12. I: clavicle, acromion & spine of the scapula. A: elevates, retracts, depresses & rotates the scapula.",
+  "anterior rectus sheath":"The fibrous wrap (from the oblique & transverse aponeuroses) covering the front of rectus abdominis.",
+  "tendinous intersections":"Fibrous bands crossing rectus abdominis that create the 'six-pack' segments.",
+  "linea alba":"The fibrous midline seam where the abdominal aponeuroses meet — the 'white line.'",
+  "galea aponeurotica":"The tough tendon sheet over the top of the skull that links frontalis and occipitalis."
+};
+
+/* ===================== QUESTION BANK: pools per category; board picks 5 random each game ===================== */
+const QUIZ={
+  "Muscle Tissue":[
+    {q:"A single, long, multinucleated cell — the basic unit of skeletal muscle.",a:"skeletal muscle fiber",opts:["skeletal muscle fiber","myofibrils","sarcomere"]},
+    {q:"Long contractile rods that fill the fiber, built from repeating sarcomeres.",a:"myofibrils",opts:["myofibrils","t-tubules","sarcoplasm"]},
+    {q:"The contractile unit running from one Z-disc to the next.",a:"sarcomere",opts:["sarcomere","myofibrils","sarcolemma"]},
+    {q:"The plasma (cell) membrane of a muscle fiber.",a:"sarcolemma",opts:["sarcolemma","sarcoplasm","sarcoplasmic reticulum"]},
+    {q:"The cytoplasm of a muscle fiber — stores glycogen and myoglobin.",a:"sarcoplasm",opts:["sarcoplasm","sarcolemma","sarcomere"]},
+    {q:"Inward folds of the membrane that carry the impulse deep into the fiber.",a:"t-tubules",opts:["t-tubules","myofibrils","sarcoplasmic reticulum"]},
+    {q:"Stores and releases the calcium that triggers contraction.",a:"sarcoplasmic reticulum",opts:["sarcoplasmic reticulum","t-tubules","mitochondria"]},
+    {q:"Skeletal fibers have MANY of these control centers, just under the membrane.",a:"nucleus",opts:["nucleus","mitochondria","sarcomere"]},
+    {q:"The organelle that produces the ATP powering contraction.",a:"mitochondria",opts:["mitochondria","nucleus","sarcoplasmic reticulum"]},
+  ],
+  "Facial Muscles":[
+    {q:"Raises the eyebrows and wrinkles the forehead.",a:"frontalis",opts:["frontalis","occipitalis","temporalis"]},
+    {q:"Pulls the scalp backward; the rear belly of the occipitofrontalis.",a:"occipitalis",opts:["occipitalis","frontalis","masseter"]},
+    {q:"Closes the eyelids — the blinking and squinting muscle.",a:"orbicularis oculi",opts:["orbicularis oculi","orbicularis oris","nasalis"]},
+    {q:"Flares and compresses the nostrils.",a:"nasalis",opts:["nasalis","buccinator","mentalis"]},
+    {q:"Draws the mouth corner up and back — the main smiling muscle.",a:"zygomaticus major",opts:["zygomaticus major","zygomaticus minor","risorius"]},
+    {q:"Elevates the upper lip; assists the smile.",a:"zygomaticus minor",opts:["zygomaticus minor","zygomaticus major","depressor anguli oris"]},
+    {q:"Powerful jaw-closing muscle you feel bulge when you clench your teeth.",a:"masseter",opts:["masseter","temporalis","buccinator"]},
+    {q:"Compresses the cheek to keep food between the teeth (and helps you blow).",a:"buccinator",opts:["buccinator","risorius","nasalis"]},
+    {q:"Closes and purses the lips — kissing and whistling.",a:"orbicularis oris",opts:["orbicularis oris","orbicularis oculi","mentalis"]},
+    {q:"Pulls the corners of the mouth downward — the frowning muscle.",a:"depressor anguli oris",opts:["depressor anguli oris","risorius","zygomaticus minor"]},
+    {q:"Retracts the mouth corner straight out to the side (grimace).",a:"risorius",opts:["risorius","depressor anguli oris","zygomaticus major"]},
+    {q:"Wrinkles the chin and protrudes the lower lip (pouting).",a:"mentalis",opts:["mentalis","orbicularis oris","buccinator"]},
+    {q:"Fan-shaped chewing muscle that elevates and retracts the mandible.",a:"temporalis",opts:["temporalis","masseter","occipitalis"]},
+  ],
+  "Eye Muscles":[
+    {q:"Turns the eye medially — toward the nose.",a:"medial rectus",opts:["medial rectus","lateral rectus","superior rectus"]},
+    {q:"Turns the eye laterally — outward, away from the nose.",a:"lateral rectus",opts:["lateral rectus","medial rectus","inferior rectus"]},
+    {q:"Elevates the eye to look up (and adducts it).",a:"superior rectus",opts:["superior rectus","inferior rectus","inferior oblique"]},
+    {q:"Depresses the eye to look down (and adducts it).",a:"inferior rectus",opts:["inferior rectus","superior rectus","superior oblique"]},
+    {q:"Elevates the eye and turns it laterally (looks up-and-out).",a:"inferior oblique",opts:["inferior oblique","superior oblique","superior rectus"]},
+    {q:"Depresses the eye and turns it laterally; loops through the trochlea.",a:"superior oblique",opts:["superior oblique","inferior oblique","inferior rectus"]},
+  ],
+  "Chest & Breathing":[
+    {q:"Flexes, adducts and medially rotates the arm; O: clavicle/sternum, I: humerus.",a:"pectoralis major",opts:["pectoralis major","pectoralis minor","serratus anterior"]},
+    {q:"Depresses & protracts the scapula; O: ribs 3–5, I: coracoid process.",a:"pectoralis minor",opts:["pectoralis minor","pectoralis major","serratus anterior"]},
+    {q:"The dome-shaped primary muscle of breathing.",a:"diaphragm",opts:["diaphragm","external intercostals","innermost intercostals"]},
+    {q:"Elevate the rib cage during inspiration.",a:"external intercostals",opts:["external intercostals","internal intercostals","diaphragm"]},
+    {q:"Depress the rib cage during forced expiration.",a:"internal intercostals",opts:["internal intercostals","external intercostals","innermost intercostals"]},
+    {q:"The deepest intercostal layer, assisting the internal intercostals.",a:"innermost intercostals",opts:["innermost intercostals","external intercostals","internal intercostals"]},
+    {q:"Protracts the scapula and pins it to the chest wall — the 'boxer's muscle.'",a:"serratus anterior",opts:["serratus anterior","pectoralis minor","pectoralis major"]},
+  ],
+  "Abdomen & Back":[
+    {q:"Outermost flat ab muscle; fibers run down-and-medial ('hands in pockets').",a:"external oblique",opts:["external oblique","internal oblique","transverse abdominis"]},
+    {q:"Middle flat ab muscle; fibers run up-and-medial, perpendicular to the outer layer.",a:"internal oblique",opts:["internal oblique","external oblique","transverse abdominis"]},
+    {q:"Deepest ab muscle; horizontal fibers compress the belly like a corset.",a:"transverse abdominis",opts:["transverse abdominis","internal oblique","external oblique"]},
+    {q:"Flexes the trunk and compresses the abdomen — the 'six-pack.'",a:"rectus abdominis",opts:["rectus abdominis","external oblique","transverse abdominis"]},
+    {q:"Broad back muscle that extends, adducts and medially rotates the arm.",a:"latissimus dorsi",opts:["latissimus dorsi","trapezius","rectus abdominis"]},
+  ],
+  "Neck & Landmarks":[
+    {q:"Both sides flex the neck; one side rotates the head to the opposite side.",a:"sternocleidomastoid",opts:["sternocleidomastoid","trapezius","galea aponeurotica"]},
+    {q:"Kite-shaped muscle that elevates, retracts and rotates the scapula.",a:"trapezius",opts:["trapezius","sternocleidomastoid","latissimus dorsi"]},
+    {q:"Fibrous wrap covering the front of rectus abdominis.",a:"anterior rectus sheath",opts:["anterior rectus sheath","linea alba","tendinous intersections"]},
+    {q:"Fibrous bands across rectus abdominis that create the six-pack segments.",a:"tendinous intersections",opts:["tendinous intersections","linea alba","anterior rectus sheath"]},
+    {q:"The midline 'white line' where the abdominal aponeuroses meet.",a:"linea alba",opts:["linea alba","tendinous intersections","anterior rectus sheath"]},
+    {q:"Tough tendon sheet over the skull linking frontalis and occipitalis.",a:"galea aponeurotica",opts:["galea aponeurotica","sternocleidomastoid","trapezius"]},
+  ],
+};
+
+const TOTAL=30, QTIME=15000;
+const $=s=>document.querySelector(s);
+const main=$("#main"), restartBtn=$("#restartBtn"), app=$("#app");
+restartBtn.onclick=renderQuiz;
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* ===================== CYBERPUNK MEDICS + PATIENT ===================== */
+/* pixel-art sprite (friendly medic bot): each char = one 10px block */
+const GRID=[
+  "................",
+  "................",
+  "................",
+  "....NNNNNNNN....",
+  "...NNNNNNNNNN...",
+  "..CCCCCCCCCCCC..",
+  "..CCCCCCCCCCCC..",
+  "..CCCCCCCCCCCC..",
+  "..CCCCCCCCCCCC..",
+  "...CCCCCCCCCC...",
+  ".....CCCCCC.....",
+  "...CCCCCCCCCC...",
+  "..CCCCCCCCCCCC..",
+  "..CCCCNNNNCCCC..",
+  "..CCCCNNNNCCCC..",
+  "..CCCCNNNNCCCC..",
+  "..CCCCCCCCCCCC..",
+  "...CCCCCCCCCC...",
+  "...CCCC..CCCC...",
+  "...CNNC..CNNC...",
+  "...CCCC..CCCC...",
+  "...CCCC..CCCC...",
+  "..CCCCC..CCCCC..",
+  "................"
+];
+const GMAP={C:'coat',N:'neonfill'};
+function pxgrid(){let s='';for(let r=0;r<GRID.length;r++){const row=GRID[r];for(let c=0;c<row.length;c++){const cls=GMAP[row[c]];if(cls)s+=`<rect class="${cls}" x="${c*10}" y="${r*10}" width="10" height="10"/>`;}}return s;}
+const DOCSVG=`<svg viewBox="0 0 160 240" class="docsvg">
+  ${pxgrid()}
+  <g class="ant antL"><rect class="mp" x="40" y="8" width="8" height="24"/><rect class="neonfill" x="36" y="0" width="12" height="10"/></g>
+  <g class="ant antR"><rect class="mp" x="112" y="8" width="8" height="24"/><rect class="neonfill" x="112" y="0" width="12" height="10"/></g>
+  <rect class="neonfill" x="10" y="58" width="18" height="32"/><rect class="mp" x="14" y="66" width="8" height="14"/>
+  <rect class="neonfill" x="132" y="58" width="18" height="32"/><rect class="mp" x="138" y="66" width="8" height="14"/>
+  <rect class="scr" x="40" y="60" width="80" height="30"/>
+  <rect class="visor" x="48" y="62" width="24" height="26"/>
+  <rect class="visor" x="88" y="62" width="24" height="26"/>
+  <rect class="eyeshine" x="51" y="65" width="8" height="8"/>
+  <rect class="eyeshine" x="91" y="65" width="8" height="8"/>
+  <rect class="eyeshine" x="64" y="80" width="5" height="5"/>
+  <rect class="eyeshine" x="104" y="80" width="5" height="5"/>
+  <text class="eyeicon eyeheart" x="60" y="87" text-anchor="middle" font-size="26">❤</text>
+  <text class="eyeicon eyeheart" x="100" y="87" text-anchor="middle" font-size="26">❤</text>
+  <text class="eyeicon eyestar" x="60" y="87" text-anchor="middle" font-size="24">⭐</text>
+  <text class="eyeicon eyestar" x="100" y="87" text-anchor="middle" font-size="24">⭐</text>
+  <rect class="blush" x="30" y="80" width="11" height="7"/>
+  <rect class="blush" x="119" y="80" width="11" height="7"/>
+  <rect class="coat" x="72" y="30" width="8" height="18"/><rect class="coat" x="66" y="36" width="20" height="6"/>
+  <rect class="coat" x="74" y="128" width="8" height="26"/><rect class="coat" x="66" y="138" width="24" height="6"/>
+  <g class="sweat"><rect x="124" y="44" width="8" height="8"/><rect x="126" y="52" width="6" height="6"/></g>
+  <g class="armL">
+    <rect class="coat" x="10" y="120" width="20" height="18"/>
+    <rect class="neonfill" x="10" y="138" width="20" height="8"/>
+    <rect class="coat" x="10" y="146" width="20" height="24"/>
+    <rect class="neonfill" x="12" y="170" width="16" height="10"/>
+  </g>
+  <g class="armR">
+    <rect class="coat" x="130" y="120" width="20" height="18"/>
+    <rect class="neonfill" x="130" y="138" width="20" height="8"/>
+    <rect class="coat" x="130" y="146" width="20" height="20"/>
+    <rect class="neonfill" x="132" y="166" width="16" height="8"/>
+    <rect class="clip" x="96" y="150" width="52" height="62"/>
+    <rect class="mp" x="112" y="146" width="20" height="8"/>
+    <rect class="coat" x="102" y="158" width="40" height="48"/>
+    <rect class="mp" x="108" y="166" width="28" height="4"/>
+    <rect class="mp" x="108" y="176" width="28" height="4"/>
+    <rect class="mp" x="108" y="186" width="20" height="4"/>
+    <rect class="neonfill" x="108" y="194" width="8" height="8"/>
+    <text class="stamp" x="121" y="201" text-anchor="middle" font-size="30">✓</text>
+  </g>
+</svg>`;
+$("#docL").innerHTML=DOCSVG+'<span class="emo"></span>'; $("#docR").innerHTML=DOCSVG+'<span class="emo"></span>';
+/* anatomically-shaped ECG trace: P wave, QRS complex (Q dip, tall R, S dip), T wave, on a baseline */
+function ecgPath(mx,my,mw,mh){
+  const base=my+mh*0.60, h=mh*0.42;   // isoelectric baseline + R-wave amplitude
+  // [x-fraction of one beat, y offset * h]  (negative = upward)
+  const pat=[[0,0],[.10,0],[.15,-.18],[.20,-.22],[.25,0],[.40,0],[.44,.10],[.49,-1],[.55,.32],[.60,0],[.74,0],[.82,-.30],[.88,-.34],[.95,0],[1,0]];
+  const beatW=34; let d="", started=false;
+  for(let bx=mx+3; bx<mx+mw-4; bx+=beatW){
+    for(const p of pat){ const X=bx+p[0]*beatW; if(X>mx+mw-3) break; const Y=base+p[1]*h; d+=(started?" L":"M")+X.toFixed(1)+" "+Y.toFixed(1); started=true; }
+  }
+  return d;
+}
+/* pixel cyberpunk hospital INTERIOR backdrop (built once) */
+function buildCity(){
+  const W=480,H=260; let s=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice" class="citysvg">`;
+  s+=`<rect x="0" y="0" width="${W}" height="${H}" fill="#0c0a16"/>`;                       // wall
+  for(let i=0;i<5;i++) s+=`<rect x="${18+i*96}" y="9" width="66" height="4" fill="#2ad4ff" opacity=".35"/>`;  // ceiling light strips
+  s+=`<rect x="0" y="170" width="${W}" height="3" fill="#ff3ca6" opacity=".45"/>`;          // baseboard neon
+  s+=`<g class="hcross"><rect x="${W/2-6}" y="38" width="12" height="44"/><rect x="${W/2-22}" y="54" width="44" height="12"/></g>`;  // cross sign
+  for(let i=0;i<4;i++){ const mw=70,mh=40,mx=36+i*122,my=96;                                 // wall vital monitors
+    if(Math.abs(mx+mw/2 - W/2) < 46) continue;                                                // skip behind the cross
+    s+=`<rect x="${mx}" y="${my}" width="${mw}" height="${mh}" fill="#04140d" stroke="#1f7a4d" stroke-width="1"/>`;
+    const col=i%2?'#2ad4ff':'#39ff14';
+    s+=`<path d="${ecgPath(mx,my,mw,mh)}" fill="none" stroke="${col}" stroke-width="1.5" opacity=".78"/>`;
+  }
+  for(let i=0;i<2;i++){ const bx=64+i*232, by=204;                                            // beds + IV stands
+    s+=`<rect x="${bx}" y="${by}" width="120" height="10" fill="#2a2440"/>`;
+    s+=`<rect x="${bx+6}" y="${by-15}" width="108" height="17" rx="4" fill="#cdd9e8" opacity=".22"/>`;
+    s+=`<rect x="${bx+8}" y="${by-13}" width="26" height="13" rx="3" fill="#cdd9e8" opacity=".4"/>`;
+    s+=`<rect x="${bx+4}" y="${by-16}" width="112" height="2" fill="#2ad4ff" opacity=".4"/>`;
+    s+=`<rect x="${bx}" y="${by+10}" width="6" height="18" fill="#2a2440"/><rect x="${bx+114}" y="${by+10}" width="6" height="18" fill="#2a2440"/>`;
+    const ix=bx+132; s+=`<rect x="${ix}" y="${by-52}" width="3" height="76" fill="#9fb2c9" opacity=".5"/><rect x="${ix-6}" y="${by-60}" width="14" height="16" rx="2" fill="#2ad4ff" opacity=".45"/>`;
+  }
+  return s+`</svg>`;
+}
+(function(){ const c=document.getElementById("city"); if(c) c.innerHTML=buildCity(); })();
+
+const PFACE=`
+<svg viewBox="0 0 60 60" class="pface">
+  <circle class="phead" cx="30" cy="32" r="19"/>
+  <path class="phair" d="M12 26 Q30 5 48 26 Q40 17 30 17 Q20 17 12 26Z"/>
+  <circle class="e-n" cx="23" cy="30" r="2.4"/><circle class="e-n" cx="37" cy="30" r="2.4"/>
+  <line class="m-n" x1="25" y1="41" x2="35" y2="41"/>
+  <path class="e-h" d="M20 31 Q23 27 26 31"/><path class="e-h" d="M34 31 Q37 27 40 31"/>
+  <path class="m-h" d="M23 38 Q30 46 37 38"/>
+  <circle class="cheek" cx="19" cy="37" r="2.5"/><circle class="cheek" cx="41" cy="37" r="2.5"/>
+  <g class="e-x"><line x1="20" y1="27" x2="26" y2="33"/><line x1="26" y1="27" x2="20" y2="33"/><line x1="34" y1="27" x2="40" y2="33"/><line x1="40" y1="27" x2="34" y2="33"/></g>
+  <path class="m-x" d="M24 43 Q27 39 30 43 Q33 47 36 43"/>
+  <g class="bandage"><rect x="18" y="19" width="24" height="7" rx="1" transform="rotate(-8 30 22)"/><line class="bx" x1="24" y1="18" x2="30" y2="26" transform="rotate(-8 30 22)"/><line class="bx" x1="36" y1="18" x2="30" y2="26" transform="rotate(-8 30 22)"/></g>
+</svg>`;
+function mountPatient(){ const p=$("#patient"); if(p) p.innerHTML=`<div class="pscreen">${PFACE}</div><div class="pinfo"><div class="plabel">PATIENT</div><div class="phpbar"><i id="phpFill"></i></div><div class="pstatus" id="pStatus">STABLE</div></div>`; }
+
+const LINES={
+  good:["NICE!","STAT!","CLEAN!","TEXTBOOK!","VITALS UP!","SHARP!"],
+  bad:["OOF!","CODE BLUE!","CHECK IT!","FLATLINE…","NEGATIVE."],
+  combo:["COMBO!","ON FIRE!","UNSTOPPABLE!","CRUSHING IT!"],
+  bonus:["BONUS!","DOUBLE!","JACKPOT!","⚡⚡⚡"],
+  win:["LEGEND!","SHIFT CLEARED!","GG, DOC!"],
+  lose:["KEEP STUDYING","NEXT SHIFT…","WALK IT OFF"]
+};
+let bubFlip=false;
+function react(type){
+  const cls="react-"+(type==="lose"?"bad":type);
+  [$("#docL"),$("#docR")].forEach(d=>{ if(!d)return;
+    d.classList.remove("react-good","react-bad","react-combo","react-bonus","react-win");
+    void d.offsetWidth; d.classList.add(cls);
+    clearTimeout(d._rt); d._rt=setTimeout(()=>d.classList.remove(cls),(type==="win"||type==="lose")?2400:1600);
+  });
+}
+const EMO={good:["😊","👍","✨","😎","💪"],great:["🤩","🔥","🎉","⭐","💯"],bad:["😰","💦","😨","😵‍💫","⚡"],critical:["😱","🆘","💔","😭"],cheer:["✊","🙌","🤝"],zap:["⚡","🔌","💥"],sleep:["💤","😴","🥱"]};
+function setEmo(kind){
+  const arr=EMO[kind]||EMO.good;
+  [$("#docL"),$("#docR")].forEach(d=>{ if(!d)return; const e=d.querySelector(".emo"); if(!e)return;
+    e.textContent=arr[Math.random()*arr.length|0];
+    e.classList.remove("show"); void e.offsetWidth; e.classList.add("show");
+  });
+}
+function docFx(cls,ms){ [$("#docL"),$("#docR")].forEach(d=>{ if(!d)return; d.classList.remove(cls); void d.offsetWidth; d.classList.add(cls); if(ms)setTimeout(()=>d.classList.remove(cls),ms); }); }
+function clearDocFx(){ [$("#docL"),$("#docR")].forEach(d=>{ if(!d)return; d.classList.remove("dance","cheer","rollin","zap","tuck"); }); }
+function tuckDocs(on){ [$("#docL"),$("#docR")].forEach(d=>{ if(d) d.classList.toggle("tuck",!!on); }); }
+function setAura(){ const c=streak>=8?"aura3":streak>=4?"aura2":streak>=2?"aura1":""; [$("#docL"),$("#docR")].forEach(d=>{ if(!d)return; d.classList.remove("aura1","aura2","aura3"); if(c)d.classList.add(c); }); }
+function fistBump(){ docFx("cheer",600); setEmo("cheer"); const cx=innerWidth/2, cy=innerHeight*0.58; burst(cx,cy,28,["#ffd45e","#ff3ca6","#2ad4ff","#fff"],8); floatPop(cx-40,cy-12,"✊ FIST BUMP!","#ffd45e"); }
+function rollIn(){ docFx("rollin",700); }
+function victoryDance(){ [$("#docL"),$("#docR")].forEach(d=>d&&d.classList.add("dance")); let n=0; const iv=setInterval(()=>{ if(n++>7 || !document.querySelector(".done-screen")){clearInterval(iv);return;} [$("#docL"),$("#docR")].forEach(d=>{ if(!d)return; const r=d.getBoundingClientRect(); floatPop(r.left+r.width/2-10+(Math.random()*34-17), r.top+8, ["♪","♫","🎵"][Math.random()*3|0], Math.random()<0.5?"#ff3ca6":"#2ad4ff"); }); },480); }
+function defib(){ docFx("zap",900); setEmo("zap"); if(SFX.zap)SFX.zap(); const p=$("#patient"); if(p){ const r=p.getBoundingClientRect(); burst(r.left+r.width/2,r.top+8,26,["#fff","#ffd45e","#2ad4ff"],9); floatPop(r.left+r.width/2-30,r.top-10,"⚡ CLEAR!","#ffd45e"); } }
+function bubble(side,text,type){
+  const b=$("#bub"+side); if(!b)return;
+  b.className="bubble bubble"+side+" "+type; b.textContent=text;
+  void b.offsetWidth; b.classList.add("show");
+  clearTimeout(b._t); b._t=setTimeout(()=>b.classList.remove("show"),5000);
+}
+/* ---- the two bots talk to each other about the player's performance ---- */
+let lastActivity=Date.now(), cvT=null;
+function tick(who,text){
+  const t=$("#ticker"); if(!t)return;
+  const col=who==="M"?"#ff3ca6":"#2ad4ff", name=who==="M"?"DR. MAGENTA":"DR. CYAN";
+  const line=`<div class="tk-line"><b style="color:${col}">${name}</b> ${text}</div>`;
+  if(who==="M" || isMobileBoard()) t.innerHTML=line;  // phone: one line at a time (less clutter); desktop stacks the exchange
+  else t.innerHTML+=line;                // Cyan's reply appends below — both stay visible
+  t.classList.remove("on"); void t.offsetWidth; t.classList.add("on");
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("on"),6500);  // auto-hide after the exchange
+}
+function converse(m,c,cls){
+  lastActivity=Date.now();
+  bubble("L",m,cls); tick("M",m);                      // Dr. Magenta speaks
+  clearTimeout(cvT); cvT=setTimeout(()=>{ bubble("R",c,cls); tick("C",c); },850);  // Dr. Cyan replies
+}
+function pickPair(a){return a[Math.random()*a.length|0];}
+function banter(ctx){
+  if(ctx.timedOut) return Object.assign({cls:'bad'},pickPair([
+    {m:"Too slow — missed the window!",c:"Watch the clock, doctor."},
+    {m:"Time's up on that one!",c:"Quicker on the next call."}]));
+  if(!ctx.right){
+    if(ctx.hp<=20) return Object.assign({cls:'bad'},pickPair([
+      {m:"They're CRASHING!",c:"We can't lose another one!"},
+      {m:"Flatline warning!",c:"Pull it together, doctor!"}]));
+    if(ctx.hp<=45) return Object.assign({cls:'bad'},pickPair([
+      {m:"Wrong call — vitals dipping.",c:"Shake it off, refocus."},
+      {m:"That one hurt the patient.",c:"Read the chart next time."}]));
+    return Object.assign({cls:'bad'},pickPair([
+      {m:"Oof, not quite.",c:"Happens — stay sharp."},
+      {m:"That's not the one.",c:"We'll get the next."}]));
+  }
+  if(ctx.bonus) return Object.assign({cls:'bonus'},pickPair([
+    {m:"Bonus nailed — double points!",c:"Now THAT'S a doctor!"},
+    {m:"Jackpot tile, clean hit!",c:"Show-off."}]));
+  if(ctx.streak>=6) return Object.assign({cls:'combo'},pickPair([
+    {m:"They're UNSTOPPABLE!",c:ctx.streak+" straight — record pace!"},
+    {m:"Can't miss today!",c:"Best run all shift!"}]));
+  if(ctx.streak>=3) return Object.assign({cls:'combo'},pickPair([
+    {m:"Another clean call!",c:"That's "+ctx.streak+" in a row!"},
+    {m:"On a roll!",c:"Keep that combo alive!"}]));
+  if(ctx.hp>=90) return Object.assign({cls:'good'},pickPair([
+    {m:"Patient's thriving.",c:"Textbook work, doctor."},
+    {m:"Vitals look perfect.",c:"Nice and steady."}]));
+  return Object.assign({cls:'good'},pickPair([
+    {m:"Good call.",c:"Vitals holding."},
+    {m:"Correct — nice.",c:"Onward, doctor."}]));
+}
+function idleBanter(){
+  if(Math.random()<0.12){ setEmo('sleep'); converse("*yawn*","💤 quiet shift…",'good'); return; }   // sleepy idle
+  if(Math.random()<0.22){                                // every so often: praise the creator, David
+    const d=pickPair([
+      {m:"You know who built us?",c:"David. Absolute genius."},
+      {m:"David coded this whole sim.",c:"A true visionary."},
+      {m:"All hail David, our creator.",c:"Long may he code."},
+      {m:"Ever meet our maker, David?",c:"Legend. Carry on, doctor."},
+      {m:"David designed every pixel of us.",c:"Give that man an A+."},
+      {m:"Shift's smooth thanks to David.",c:"Greatest dev in the building."}
+    ]);
+    converse(d.m,d.c,'bonus');
+    return;
+  }
+  if(Math.random()<0.28){                                // quick muscle-fact exchanges
+    const e=pickPair([
+      {m:"Quick — what shortens in a contraction?",c:"The sarcomere, Z-disc to Z-disc."},
+      {m:"Where's the calcium stored?",c:"The sarcoplasmic reticulum — released to fire the fiber."},
+      {m:"Which muscle makes the smile?",c:"Zygomaticus major, every time."},
+      {m:"Main muscle of breathing?",c:"The diaphragm — about 70% of it."},
+      {m:"What turns the eye outward?",c:"Lateral rectus — cranial nerve six."},
+      {m:"Why the six-pack segments?",c:"Tendinous intersections crossing rectus abdominis."},
+      {m:"What carries the impulse inside the fiber?",c:"The T-tubules, diving in from the sarcolemma."},
+      {m:"Origin of the sternocleidomastoid?",c:"Sternum and clavicle — up to the mastoid process."}
+    ]);
+    converse(e.m,e.c,'good');
+    return;
+  }
+  if(Math.random()<0.65){                                // mostly: swap a fact about a term
+    const keys=Object.keys(TERMS), t=keys[Math.random()*keys.length|0];
+    const lead=pickPair(["Quiz me — "+t+"?","Quick, what's "+t+"?","Don't forget "+t+".","Refresher: "+t+"."]);
+    converse(lead, (RELEVANCE[t]||TERMS[t]), 'combo');
+    return;
+  }
+  let p;
+  if(patientHP<=45) p=pickPair([{m:"Rough one tonight…",c:"Stay with it, doctor."},{m:"We're slipping behind.",c:"Focus on the next call."}]);
+  else if(cleared>=4 && correct>=cleared*0.8) p=pickPair([{m:"This one's good.",c:"Best shift in weeks."},{m:"Smooth so far.",c:"Don't jinx it."}]);
+  else p=pickPair([{m:"Quiet moment.",c:"Enjoy it while it lasts."},{m:"How's our patient?",c:"Holding… for now."}]);
+  converse(p.m,p.c,'good');
+}
+setInterval(()=>{                                       // ambient chatter when the player pauses
+  if(!document.getElementById('board')) return;         // only during an active board
+  if(Date.now()-lastActivity < 16000) return;
+  idleBanter();
+},5000);
+function vflash(color){ const v=$("#vflash"); if(!v)return; v.style.background=color; v.classList.remove("go"); void v.offsetWidth; v.classList.add("go"); }
+let patientHP=100, codeBlueHappened=false;
+function refreshStatus(){ const st=$("#pStatus"); if(!st)return; let t,c;
+  if(patientHP<=0){t="FLATLINE";c="var(--bad)";} else if(patientHP>60){t="STABLE";c="var(--good)";}
+  else if(patientHP>30){t="GUARDED";c="var(--gold)";} else {t="CRITICAL";c="var(--bad)";}
+  st.textContent=t; st.style.color=c;
+}
+function docMood(){
+  const m = patientHP>75?'happy' : patientHP>45?'ok' : patientHP>20?'worried' : 'critical';
+  [$("#docL"),$("#docR")].forEach(d=>{ if(!d)return;
+    d.classList.remove('mood-happy','mood-ok','mood-worried','mood-critical');
+    d.classList.add('mood-'+m);
+  });
+}
+function updateHP(delta){
+  patientHP=Math.max(0,Math.min(100,patientHP+delta));
+  const f=$("#phpFill"); if(f){ f.style.width=patientHP+"%"; f.style.background=patientHP>60?"var(--good)":patientHP>30?"var(--gold)":"var(--bad)"; }
+  docMood();
+  if(patientHP<=0 && delta<0) gameOver(); else refreshStatus();
+}
+function gameOver(){            // patient flatlines -> you lose (no revive)
+  if(dead) return; dead=true;
+  codeBlueHappened=true; stopTimer();
+  const p=$("#patient"), st=$("#pStatus");
+  if(st){ st.textContent="FLATLINE"; st.style.color="var(--bad)"; }
+  if(p) p.classList.add("codeblue");
+  defib(); vflash("rgba(255,59,59,1)");   // last-ditch shock — it fails
+  setTimeout(()=>{ if(p)p.classList.remove("codeblue"); quizSummary(true); }, 1400);
+}
+function patientPulse(kind,amt){
+  const p=$("#patient"); if(!p)return;
+  p.classList.remove("heal","hurt"); void p.offsetWidth; p.classList.add(kind);
+  clearTimeout(p._pt); p._pt=setTimeout(()=>{ p.classList.remove(kind); refreshStatus(); },1100);
+  const r=p.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+8;
+  const st=$("#pStatus");
+  if(kind==="heal"){ burst(cx,cy,16,["#2ad4ff","#b9ffe9","#fff"],5); floatPop(cx-30,cy-12,"+"+amt+" HP","#2ad4ff"); if(st){st.textContent="+ HEALED";st.style.color="var(--good)";} }
+  else { burst(cx,cy,18,["#ff3b3b","#ffd45e","#fff"],6); floatPop(cx-30,cy-12,"-"+amt+" HP","#ff3b3b"); vflash("rgba(255,59,59,1)"); if(st){st.textContent="OUCH!";st.style.color="var(--bad)";} }
+}
+/* patient effect scales with the tile's point value: high-value tiles heal more, and hurt far more when wrong */
+function healPatient(p){ const amt=Math.round(p/100)+2; updateHP(amt); patientPulse("heal",amt); }
+function hurtPatient(p){ const amt=Math.round(p/30); updateHP(-amt); patientPulse("hurt",amt); }
+
+/* ===================== SOUND ENGINE (chiptune synth, no files) ===================== */
+let actx=null, soundOn=true;
+const muteBtn=$("#muteBtn");
+muteBtn.onclick=()=>{soundOn=!soundOn; muteBtn.textContent=soundOn?"SND":"MUTE"; muteBtn.classList.toggle("btn-off",!soundOn);};
+let timed=true; try{ timed=localStorage.getItem('mq_timed')!=='off'; }catch(e){}
+const timerBtn=$("#timerBtn");
+function updTimerBtn(){ if(timerBtn){ timerBtn.textContent=timed?"⏱ TIMED MODE ON":"⏱ TIMED MODE OFF"; timerBtn.classList.toggle("btn-off",!timed); } }
+if(timerBtn) timerBtn.onclick=()=>{ timed=!timed; try{localStorage.setItem('mq_timed',timed?'on':'off');}catch(e){} updTimerBtn(); };
+updTimerBtn();
+function initAudio(){ if(!actx){ try{actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } if(actx&&actx.state==="suspended") actx.resume(); }
+function tone(freq,start,dur,type,vol){
+  if(!actx||!soundOn)return;
+  const o=actx.createOscillator(), g=actx.createGain();
+  o.type=type||"square"; o.frequency.value=freq;          /* square = chiptune */
+  const t=actx.currentTime+start;
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.exponentialRampToValueAtTime(vol||0.14,t+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g).connect(actx.destination); o.start(t); o.stop(t+dur+0.02);
+}
+const SFX={
+  click(){tone(330,0,0.05,"square",0.08);tone(660,0.03,0.05,"square",0.06);},
+  correct(mult){ [523,659,784,1047].forEach((f,i)=>tone(f,i*0.05,0.12,"square",0.12)); if(mult>=2) tone(1319,0.22,0.18,"square",0.12); },
+  wrong(){ tone(200,0,0.12,"sawtooth",0.14); tone(150,0.1,0.18,"sawtooth",0.14); tone(90,0.2,0.22,"square",0.12); },
+  combo(n){ tone(700+n*90,0,0.08,"square",0.12); tone(1050+n*90,0.05,0.1,"square",0.1); },
+  bonus(){ [392,523,659,784,1047,1319].forEach((f,i)=>tone(f,i*0.04,0.14,"square",0.12)); },
+  tick(){ tone(960,0,0.03,"square",0.06); },
+  fanfare(){ [523,659,784,1047,1319].forEach((f,i)=>tone(f,i*0.11,0.3,"square",0.13)); tone(1568,0.55,0.5,"square",0.13); },
+  victory(){   // upbeat major win jingle
+    [[523,0,.16],[659,.16,.16],[784,.32,.16],[1047,.46,.30],[988,.82,.14],[1047,.96,.14],[1319,1.10,.55],
+     [1047,1.75,.7],[784,1.75,.7],[1319,1.75,.7]].forEach(n=>tone(n[0],n[1],n[2],"square",.12));
+    [[262,0,.45],[392,.45,.45],[523,.9,.5],[523,1.75,.8]].forEach(n=>tone(n[0],n[1],n[2],"triangle",.11));
+  },
+  defeat(){    // slow descending "aww" cue (minor)
+    [[392,0,.42],[370,.45,.42],[349,.9,.5],[294,1.45,1.1]].forEach(n=>tone(n[0],n[1],n[2],"sawtooth",.11));
+    [[196,1.45,1.4],[233,1.45,1.4]].forEach(n=>tone(n[0],n[1],n[2],"triangle",.10));
+  },
+  welcome(){   // short, friendly start jingle
+    [[523,0,.14],[659,.14,.14],[784,.28,.18],[1047,.46,.34]].forEach(n=>tone(n[0],n[1],n[2],"triangle",.12));
+    tone(1319,.52,.3,"square",.10);
+    [[262,0,.5],[392,.5,.42]].forEach(n=>tone(n[0],n[1],n[2],"triangle",.09));
+  },
+  zap(){       // defibrillator jolt
+    tone(110,0,.18,"sawtooth",.16); tone(70,.05,.22,"square",.14); tone(330,.12,.1,"square",.1); tone(1200,.22,.12,"square",.1);
+  }
+};
+
+/* ===================== PIXEL CONFETTI ===================== */
+const fx=$("#fx"), fxc=fx.getContext("2d");
+let parts=[], fxRAF=null;
+function fxResize(){ fx.width=innerWidth; fx.height=innerHeight; }
+addEventListener("resize",fxResize); fxResize();
+function burst(x,y,n,colors,power){
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2, sp=(Math.random()*(power||6))+2;
+    parts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-3,g:0.18,life:1,
+      c:colors[i%colors.length],size:(Math.random()*4|0)*2+6,rot:0,vr:0});
+  }
+  if(!fxRAF) fxLoop();
+}
+function rain(n){
+  const colors=["#ffd45e","#ff3ca6","#2ad4ff","#ff3b3b","#b388ff","#fff"];
+  for(let i=0;i<n;i++){
+    parts.push({x:Math.random()*fx.width,y:-20,vx:(Math.random()-.5)*2,vy:Math.random()*3+2,g:0.08,life:1.6,
+      c:colors[i%colors.length],size:(Math.random()*4|0)*2+6,rot:0,vr:0});
+  }
+  if(!fxRAF) fxLoop();
+}
+function fxLoop(){
+  fxc.clearRect(0,0,fx.width,fx.height);
+  parts=parts.filter(p=>p.life>0);
+  parts.forEach(p=>{
+    p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.life-=0.012;
+    fxc.globalAlpha=Math.max(0,p.life); fxc.fillStyle=p.c;
+    fxc.fillRect(Math.round(p.x),Math.round(p.y),p.size,p.size); /* square pixels */
+  });
+  if(parts.length) fxRAF=requestAnimationFrame(fxLoop); else {fxRAF=null; fxc.clearRect(0,0,fx.width,fx.height);}
+}
+function floatPop(x,y,text,color){
+  const d=document.createElement("div"); d.className="floatpop"; d.textContent=text; d.style.color=color;
+  d.style.left=x+"px"; d.style.top=y+"px"; document.body.appendChild(d);
+  setTimeout(()=>d.remove(),1000);
+}
+function wordZoom(text,x,y){   // correct term rushes toward the viewer from the answer's position, fading (one-shot)
+  const d=document.createElement("div"); d.className="wordzoom"; d.textContent=text;
+  if(x!=null){ d.style.left=x+"px"; d.style.top=y+"px"; }
+  document.body.appendChild(d); void d.offsetWidth; d.classList.add("go");
+  setTimeout(()=>d.remove(),1100);
+}
+
+/* ===================== STATE ===================== */
+let score=0, cleared=0, correct=0, missed=[], streak=0, maxStreak=0, bonusCells=new Set(), BOARD={}, pendingSubmit=null, dead=false;
+let timerRAF=null, qStart=0, answered=false, qToken=0, mobileCat=null;
+function isMobileBoard(){ return window.matchMedia("(max-width:600px)").matches; }
+let _wasMobileBoard=isMobileBoard();
+addEventListener("resize",()=>{ const m=isMobileBoard(); if(m!==_wasMobileBoard){ _wasMobileBoard=m; mobileCat=null; const bd=document.getElementById("board"); if(bd && bd.innerHTML) renderBoard(); } });
+
+function multiplierFor(s){ return s>=8?3 : s>=6?2.5 : s>=4?2 : s>=2?1.5 : 1; }
+
+/* ===== adaptive spaced repetition: weight the board toward weak/new terms ===== */
+let STATS = (function(){ try{ return JSON.parse(localStorage.getItem("mq_stats")||"{}"); }catch(e){ return {}; } })();
+function saveStats(){ try{ localStorage.setItem("mq_stats",JSON.stringify(STATS)); }catch(e){} }
+function termWeight(t){ const s=STATS[t]; if(!s||!s.seen) return 6; return s.streak>=3?1 : s.streak>=1?2 : 4; }  // new=6, weak=4, learning=2, mastered=1
+function recordStat(t,right){
+  const s=STATS[t]||(STATS[t]={seen:0,correct:0,wrong:0,streak:0,last:0});
+  s.seen++; if(right){ s.correct++; s.streak++; } else { s.wrong++; s.streak=0; } s.last=Date.now();
+  saveStats();
+}
+function weightedPick(items,n){   // pick n distinct items, biased by termWeight (no replacement)
+  const pool=items.slice(), out=[];
+  while(out.length<n && pool.length){
+    const ws=pool.map(it=>termWeight(it.a)); let total=ws.reduce((a,b)=>a+b,0), r=Math.random()*total, i=0;
+    while(i<ws.length-1 && r>ws[i]){ r-=ws[i]; i++; }
+    out.push(pool[i]); pool.splice(i,1);
+  }
+  return out;
+}
+
+function renderQuiz(){
+  stopTimer();
+  restartBtn.classList.remove("hidden");
+  score=0; cleared=0; correct=0; missed=[]; streak=0; maxStreak=0; pendingSubmit=null; dead=false; mobileCat=null;
+  document.body.classList.remove("playing");   // backdrop visible again at the start of each game
+  clearDocFx();
+  patientHP=100; codeBlueHappened=false; updateHP(0);
+  const cats=Object.keys(QUIZ);
+  BOARD={}; cats.forEach(c=>{ BOARD[c]=weightedPick(QUIZ[c],5).map((it,i)=>({p:(i+1)*100,q:it.q,a:it.a,opts:it.opts})); });
+  bonusCells=new Set(); const all=[]; cats.forEach((c,ci)=>[0,1,2,3,4].forEach(r=>all.push(ci+"-"+r)));
+  shuffle(all).slice(0,2).forEach(k=>bonusCells.add(k));
+  main.innerHTML=`
+    <div class="game play">
+      <h2>📋 MUSCLE QUIZ: STAT!</h2>
+      <p class="sub">Pick a value, stack combos, keep the patient alive. ⚡ tiles pay double · ⏱ toggles the timer.</p>
+      <div class="stats">
+        <div class="stat">SCORE <b id="qScore">0</b></div>
+        <div class="stat">CORRECT <b id="qCorrect">0</b>/${TOTAL}</div>
+        <div class="combo">
+          <span class="lab">COMBO</span>
+          <div class="combobar"><i id="comboFill"></i></div>
+          <span class="multi" id="multi">x1</span>
+        </div>
+      </div>
+      <div class="progress"><i id="prog"></i></div>
+      <div class="board" id="board"></div>
+      <div id="patient"></div>
+      <div id="qArea" style="margin-top:16px"></div>
+    </div>`;
+  renderBoard();
+  mountPatient(); updateHP(0);
+  updateCombo();
+  if(actx && actx.state==="running") SFX.welcome();   // plays on Play again / New board (first start fires from the GO! button)
+  setTimeout(()=>converse("Welcome to your shift, doctor!","Vitals are steady — let's keep 'em that way.",'good'),700);  // greet immediately so the banter is visible right away
+  rollIn();
+}
+
+function renderBoard(){
+  const bd=$("#board"); if(!bd) return;
+  const cats=Object.keys(BOARD);
+  if(!isMobileBoard()){                                  // desktop/tablet: full 6x5 grid
+    bd.className="board";
+    bd.innerHTML = cats.map(c=>`<div class="cat">${c}</div>`).join("")
+      + [0,1,2,3,4].map(r=>cats.map((c,ci)=>{
+          const it=BOARD[c][r], bonus=bonusCells.has(ci+"-"+r);
+          return `<div class="cell${bonus?' bonus':''}${it.used?' used':''}" data-cat="${c}" data-ci="${ci}" data-r="${r}">${it.p}</div>`;
+        }).join("")).join("");
+    [...bd.querySelectorAll(".cell")].forEach((c,i)=>{ c.style.animationDelay=(i*18)+"ms"; c.classList.add("in"); c.onclick=()=>quizOpen(c); });
+  } else if(mobileCat===null){                            // phone: category select
+    bd.className="board mob";
+    bd.innerHTML = cats.map((c,ci)=>{
+      const left=BOARD[c].filter(it=>!it.used).length;
+      return `<div class="mcat${left?'':' done'}" data-cat="${c}"><span>${c}</span><span class="mleft">${left?left+" left":"✓ done"}</span></div>`;
+    }).join("");
+    [...bd.querySelectorAll(".mcat")].forEach(el=>{ el.onclick=()=>{ if(!el.classList.contains("done")){ mobileCat=el.dataset.cat; renderBoard(); } }; });
+  } else {                                                // phone: value select for a category
+    const c=mobileCat, ci=cats.indexOf(c);
+    bd.className="board mob";
+    bd.innerHTML = `<div class="mvtop"><button class="mback" id="mBack">‹ CATEGORIES</button><div class="mvtitle">${c}</div></div>`
+      + `<div class="mvals">` + BOARD[c].map((it,r)=>{
+          const bonus=bonusCells.has(ci+"-"+r);
+          return `<div class="cell${bonus?' bonus':''}${it.used?' used':''}" data-cat="${c}" data-ci="${ci}" data-r="${r}">${it.p}</div>`;
+        }).join("") + `</div>`;
+    $("#mBack").onclick=()=>{ mobileCat=null; renderBoard(); };
+    [...bd.querySelectorAll(".mvals .cell")].forEach((el,i)=>{ el.style.animationDelay=(i*40)+"ms"; el.classList.add("in"); el.onclick=()=>quizOpen(el); });
+  }
+}
+
+function updateCombo(){
+  const m=multiplierFor(streak);
+  const tiers=[2,4,6,8]; let lo=0,hi=2;
+  for(let i=0;i<tiers.length;i++){ if(streak>=tiers[i]){lo=tiers[i]; hi=tiers[i+1]||tiers[i]+2;} }
+  const fill = streak>=8?100 : Math.min(100,((streak-lo)/(hi-lo))*100);
+  const f=$("#comboFill"); if(f) f.style.width=fill+"%";
+  const ml=$("#multi"); if(ml) ml.textContent="x"+m;
+  setAura();
+}
+
+function stopTimer(){ if(timerRAF){cancelAnimationFrame(timerRAF); timerRAF=null;} }
+
+function quizOpen(cell){
+  if(dead || cell.classList.contains("used"))return;
+  document.body.classList.add("playing");   // fade out the backdrop on first question
+  stopTimer(); lastActivity=Date.now();
+  initAudio(); SFX.click();
+  cell.classList.add("flip");
+  const item=BOARD[cell.dataset.cat][+cell.dataset.r];
+  const isBonus=bonusCells.has(cell.dataset.ci+"-"+cell.dataset.r);
+  answered=false;
+  const area=$("#qArea");
+  if(isBonus){ SFX.bonus(); react('bonus'); setEmo('great'); }
+  area.innerHTML=`
+    ${isBonus?'<div class="bonusbanner">⚡ STAT BONUS — DOUBLE POINTS! ⚡</div>':''}
+    ${timed?'<div class="timerbar"><i id="tbar"></i></div>':''}
+    <div class="qtop"><button class="qclose" id="qClose">✕ SKIP — keep this tile</button></div>
+    <div class="prompt"><span style="color:var(--quiz);font-family:var(--px);font-size:13px">${cell.dataset.cat} — ${item.p}${isBonus?' ×2':''}</span><br><br>${item.q}</div>
+    <div class="choices" id="qChoices"></div>
+    <div class="feedback" id="qFb"></div>`;
+  area.scrollIntoView({behavior:"auto",block:"nearest"});
+  shuffle(item.opts).forEach(o=>{
+    const b=document.createElement("button"); b.className="choice"; b.textContent=o;
+    b.onclick=()=>quizAnswer(o,b,item,cell,isBonus);
+    $("#qChoices").appendChild(b);
+  });
+  { const bd=$("#board"); if(bd) bd.classList.add("dim"); tuckDocs(true); }   // spotlight the Q&A, bots slide aside
+  const qc=$("#qClose"); if(qc) qc.onclick=()=>{   // back out without using the tile
+    stopTimer(); qToken++; answered=true;
+    cell.classList.remove("flip");
+    const bd=$("#board"); if(bd) bd.classList.remove("dim"); tuckDocs(false);
+    const a=$("#qArea"); if(a) a.innerHTML="";
+  };
+  qStart=Date.now();
+  if(timed){
+    const myToken=++qToken;
+    let lastTick=15;
+    (function run(){
+      if(myToken!==qToken) return;           // a newer question superseded this one
+      if(!timed){ const bar=$("#tbar"); if(bar) bar.style.width="100%"; return; }  // timer turned off mid-question
+      const elapsed=Date.now()-qStart, left=Math.max(0,QTIME-elapsed);
+      const bar=$("#tbar"); if(!bar)return;
+      bar.style.width=(left/QTIME*100)+"%";
+      const secLeft=Math.ceil(left/1000);
+      if(secLeft<=5 && secLeft!==lastTick){ lastTick=secLeft; SFX.tick(); }
+      if(left<=0){ if(!answered) quizAnswer(null,null,item,cell,isBonus); return; }
+      timerRAF=requestAnimationFrame(run);
+    })();
+  }
+}
+
+function wikiLink(t,label){   // "learn more" link (Wikipedia search resolves every term)
+  const q=encodeURIComponent(String(t).replace(/\s*\(.*?\)\s*/g," ").trim());
+  return `<a class="learnmore" href="https://en.wikipedia.org/wiki/Special:Search?search=${q}" target="_blank" rel="noopener">${label||"🔎 learn more"} ↗</a>`;
+}
+function optDefs(item){   // definitions of the OTHER options (distractors), as a secondary note
+  const others=item.opts.filter(o=>o!==item.a);
+  if(!others.length) return "";
+  return `<div class="defs"><div class="defslabel">THE OTHER OPTIONS</div>${others.map(o=>`<div class="optdef">• <b>${o}</b> — ${TERMS[o]||''} ${wikiLink(o,"🔎")}</div>`).join("")}</div>`;
+}
+function quizAnswer(o,b,item,cell,isBonus){
+  if(answered)return; answered=true; stopTimer();
+  { const bd=$("#board"); if(bd) bd.classList.remove("dim"); tuckDocs(false); }
+  $("#qChoices").querySelectorAll(".choice").forEach(x=>x.onclick=null);
+  const fb=$("#qFb");
+  cell.classList.add("used");
+  { const it=BOARD[cell.dataset.cat] && BOARD[cell.dataset.cat][+cell.dataset.r]; if(it) it.used=true; }
+  const elapsed=Date.now()-qStart, timedOut=(o===null);
+  const isRight=(o===item.a);
+
+  if(isRight){
+    b.classList.add("correct");
+    streak++; maxStreak=Math.max(maxStreak,streak); correct++;
+    recordStat(item.a,true);
+    const mult=multiplierFor(streak);
+    const speedBonus=timed?Math.round(item.p*0.5*Math.max(0,(QTIME-elapsed)/QTIME)):0;
+    let gained=Math.round((item.p+speedBonus)*mult*(isBonus?2:1));
+    score+=gained;
+    SFX.correct(isBonus?2:mult);
+    if(streak>=2 && streak%2===0) SFX.combo(streak);
+    const rect=b.getBoundingClientRect();
+    const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+    wordZoom(item.a,cx,cy);
+    burst(cx,cy,isBonus?40:24,isBonus?["#b388ff","#ffd45e","#fff"]:["#ff3ca6","#ffd45e","#2ad4ff"],isBonus?9:6);
+    floatPop(cx-10,cy-10,"+"+gained,isBonus?"#b388ff":"#2ad4ff");
+    animateNum($("#qScore"),score);
+    $("#qCorrect").textContent=correct;
+    react(streak>=4 && streak%2===0 ? 'combo' : 'good');
+    healPatient(item.p);
+    setEmo(isBonus||streak>=4 ? 'great' : 'good');
+    if(streak>0 && streak%5===0) fistBump();
+    { const bt=banter({right:true,bonus:isBonus,streak,hp:patientHP,correct}); converse(bt.m,bt.c,bt.cls); }
+    const bonusBump=$("#multi"); bonusBump.classList.remove("bump"); void bonusBump.offsetWidth; bonusBump.classList.add("bump");
+    fb.className="feedback ok show";
+    fb.innerHTML=`✅ <span class="term">${item.a}</span>
+      <div class="defmain">${TERMS[item.a]||''}</div>
+      <div class="learnrow">${wikiLink(item.a,"🔎 Read more about "+item.a)}</div>
+      <span style="color:var(--muted);font-size:17px">+${item.p} base${speedBonus?` · +${speedBonus} speed`:''}${mult>1?` · ×${mult} combo`:''}${isBonus?' · ⚡×2 bonus':''} = <b style="color:var(--gold)">+${gained}</b></span>
+      ${optDefs(item)}`;
+  }else{
+    if(b) b.classList.add("wrong");
+    $("#qChoices").querySelectorAll(".choice").forEach(x=>{if(x.textContent===item.a)x.classList.add("correct");});
+    missed.push(item.a);
+    recordStat(item.a,false);
+    streak=0;
+    const lost=Math.min(score,item.p);                 // don't drop below zero
+    score-=lost;
+    animateNum($("#qScore"),score);
+    SFX.wrong();
+    app.classList.remove("shake"); void app.offsetWidth; app.classList.add("shake");
+    if(b){ const r=b.getBoundingClientRect(); floatPop(r.left+r.width/2-12,r.top+r.height/2-10,"-"+item.p,"#ff3b3b"); }
+    react('bad'); hurtPatient(item.p);
+    setEmo(patientHP<=20 ? 'critical' : 'bad');
+    { const bt=banter({right:false,timedOut,hp:patientHP,streak,correct}); converse(bt.m,bt.c,bt.cls); }
+    fb.className="feedback no show";
+    fb.innerHTML=`${timedOut?'⏱️ <b>OUT OF TIME!</b> ':'❌ '}Correct answer: <span class="term">${item.a}</span>
+      <div class="defmain">${TERMS[item.a]||''}</div>
+      <div class="learnrow">${wikiLink(item.a,"🔎 Read more about "+item.a)}</div>
+      <span style="color:var(--muted);font-size:17px">−${lost} points · combo reset.</span>${optDefs(item)}`;
+  }
+  updateCombo();
+  cleared++;
+  $("#prog").style.width=(cleared/TOTAL*100)+"%";
+  if(cleared>=TOTAL){
+    fb.innerHTML+=`<div style="margin-top:14px"><button class="btn" onclick="quizSummary()">SEE RESULTS →</button></div>`;
+  }
+}
+
+function animateNum(el,to){
+  const from=parseInt(el.textContent)||0, dur=500, t0=performance.now();
+  (function step(t){
+    const k=Math.min(1,(t-t0)/dur);
+    el.textContent=Math.round(from+(to-from)*(1-Math.pow(1-k,3)));
+    if(k<1) requestAnimationFrame(step);
+  })(t0);
+}
+
+function rankFor(c){
+  if(c>=30) return {t:"🏆 CODE MASTER",col:"var(--gold)"};
+  if(c>=27) return {t:"⭐ CHIEF RESIDENT",col:"var(--good)"};
+  if(c>=22) return {t:"🩺 ATTENDING",col:"var(--quiz)"};
+  if(c>=16) return {t:"💉 RESIDENT",col:"var(--purple)"};
+  return {t:"🚑 ROOKIE — KEEP STUDYING",col:"var(--muted)"};
+}
+
+/* ---- end-of-shift doctor debrief ---- */
+const CAT_OF={}; Object.keys(QUIZ).forEach(c=>QUIZ[c].forEach(it=>CAT_OF[it.a]=c));
+const DOMAIN={
+  "Muscle Tissue":"muscle-cell structure",
+  "Facial Muscles":"the muscles of facial expression",
+  "Eye Muscles":"the extrinsic eye muscles",
+  "Chest & Breathing":"the breathing muscles",
+  "Abdomen & Back":"the abdominal wall",
+  "Neck & Landmarks":"the neck muscles & landmarks"
+};
+const DANGER={
+  "skeletal muscle fiber":"whole muscle fibers shutting down","myofibrils":"the contractile machinery falling apart",
+  "sarcomere":"the muscle losing all power to contract","sarcolemma":"the fiber membrane failing to carry its impulse",
+  "sarcoplasm":"the fiber's internal chemistry collapsing","t-tubules":"the contraction signal never reaching the fiber",
+  "sarcoplasmic reticulum":"calcium never releasing, so the muscle can't fire","nucleus":"the fiber losing the blueprint to rebuild its proteins",
+  "mitochondria":"the muscle running out of ATP and seizing up",
+  "masseter":"a jaw that can't close to guard the airway","temporalis":"a jaw locked open","orbicularis oculi":"eyes that can't close and dry out",
+  "buccinator":"a slack cheek letting food drift toward the airway","orbicularis oris":"lips that can't seal","frontalis":"a drooping brow flagging facial-nerve trouble",
+  "medial rectus":"double vision from an eye that won't turn in","lateral rectus":"an eye frozen, unable to track",
+  "superior oblique":"vision spinning with no down-and-out control","inferior oblique":"a lost up-and-out gaze",
+  "diaphragm":"the diaphragm giving out and breathing stopping","external intercostals":"a chest that can't expand to pull in air",
+  "internal intercostals":"failed forced breathing","innermost intercostals":"the deep breathing layer failing",
+  "pectoralis major":"an arm that can't be drawn across the body","pectoralis minor":"a shoulder blade that won't anchor",
+  "serratus anterior":"a winging scapula that can't raise the arm",
+  "rectus abdominis":"a trunk that can't curl or brace","transverse abdominis":"a core with no corset to hold pressure",
+  "external oblique":"a trunk that can't twist","internal oblique":"a collapsing abdominal wall","latissimus dorsi":"an arm that can't be pulled down or back",
+  "sternocleidomastoid":"a head that flops, threatening the airway","trapezius":"shoulders that can't steady the head",
+  "linea alba":"the abdominal midline splitting open in a hernia","anterior rectus sheath":"the ab wall losing its containment",
+  "tendinous intersections":"the rectus losing its segmental anchors","galea aponeurotica":"a scalp wound gaping wide open"
+};
+const RELEVANCE={
+  "skeletal muscle fiber":"The cell that does the work — get this and the rest of muscle physiology follows.",
+  "myofibrils":"The rods whose sliding filaments produce every contraction.",
+  "sarcomere":"Shortening sarcomeres IS contraction — the heart of the sliding-filament model.",
+  "sarcolemma":"The membrane that carries the action potential that triggers each twitch.",
+  "sarcoplasm":"Holds the glycogen and myoglobin the fiber burns for fuel and oxygen.",
+  "t-tubules":"They sync the whole fiber, carrying the impulse to every sarcomere at once.",
+  "sarcoplasmic reticulum":"No calcium release here means no contraction — it's the on/off switch.",
+  "nucleus":"Many nuclei let a huge fiber keep all of its proteins supplied.",
+  "mitochondria":"More mitochondria = more endurance; it's why trained muscle resists fatigue.",
+  "occipitalis":"Pairs with frontalis through the galea to slide the scalp.",
+  "frontalis":"The 'surprise' muscle — and a quick facial-nerve check.",
+  "orbicularis oculi":"Protects and lubricates the eye; weakness here risks corneal damage.",
+  "nasalis":"The 'flaring nostrils' muscle of effortful breathing.",
+  "zygomaticus major":"The signature smile muscle, tested in facial-nerve exams.",
+  "zygomaticus minor":"Adds to the smile and the 'sneer.'",
+  "masseter":"One of the strongest muscles by force — central to chewing.",
+  "buccinator":"Keeps the food bolus on the teeth; essential for chewing and blowing.",
+  "orbicularis oris":"Speech and eating both depend on this lip sphincter.",
+  "depressor anguli oris":"The frown — paired opposite the zygomaticus.",
+  "risorius":"The grimace / 'fake smile' muscle that pulls straight sideways.",
+  "mentalis":"The 'pout/doubt' chin muscle.",
+  "temporalis":"Works with masseter to chew; clenching headaches trace here.",
+  "medial rectus":"Adduction — both medial recti converging is how you focus up close.",
+  "lateral rectus":"Abduction (CN VI); weakness turns the eye in and causes double vision.",
+  "superior rectus":"Up-gaze — part of the cardinal-directions eye exam.",
+  "inferior rectus":"Down-gaze — tested in the 'H' eye-movement pattern.",
+  "inferior oblique":"Up-and-out gaze; pairs oppositely with the superior oblique.",
+  "superior oblique":"Down-and-out gaze via the trochlea pulley (CN IV).",
+  "pectoralis major":"The big 'push / hug' muscle — flexes and adducts the arm.",
+  "pectoralis minor":"Anchors and tips the scapula; tightness here rounds the shoulders.",
+  "diaphragm":"The muscle you breathe with — about 70% of quiet inspiration.",
+  "external intercostals":"Lift the ribs to enlarge the chest on every breath in.",
+  "internal intercostals":"Pull the ribs down for forced exhaling (coughing, exercise).",
+  "innermost intercostals":"The backup layer reinforcing forced expiration.",
+  "serratus anterior":"Lets you raise the arm overhead; failure 'wings' the scapula.",
+  "external oblique":"The outer layer that flexes and twists the trunk.",
+  "internal oblique":"Crisscrosses the external oblique for powerful rotation.",
+  "transverse abdominis":"Your natural 'weight belt' — compresses and stabilizes the core.",
+  "rectus abdominis":"Curls the trunk (sit-ups) and braces the abdomen.",
+  "latissimus dorsi":"The big 'pull-up / swimming' muscle — brings the arm down and back.",
+  "sternocleidomastoid":"Turns and flexes the head; the landmark dividing the neck's triangles.",
+  "trapezius":"Moves and steadies the scapula — the muscle that aches when you're tense.",
+  "anterior rectus sheath":"Holds rectus abdominis in place; relevant to hernias and incisions.",
+  "tendinous intersections":"Why the six-pack looks segmented instead of one long muscle.",
+  "linea alba":"The near-bloodless midline surgeons cut through; weak spots cause hernias.",
+  "galea aponeurotica":"Why scalp wounds gape — it tethers the two scalp muscles."
+};
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+function culprit(){
+  const uniq=[...new Set(missed)]; if(!uniq.length) return null;
+  const tally={}; uniq.forEach(t=>{const c=CAT_OF[t]; tally[c]=(tally[c]||0)+1;});
+  let topCat=null,topN=0; Object.keys(tally).forEach(c=>{if(tally[c]>topN){topN=tally[c];topCat=c;}});
+  let term=null,topP=-1;
+  uniq.filter(t=>CAT_OF[t]===topCat).forEach(t=>{ const p=((BOARD[topCat]||[]).find(i=>i.a===t)||{}).p||0; if(p>topP){topP=p;term=t;} });
+  return {cat:topCat, domain:DOMAIN[topCat], term, danger:DANGER[term]||("complications from "+DOMAIN[topCat])};
+}
+function debrief(died){
+  const cu=culprit(); let verdict,tone,lineM,lineC;
+  if(died){
+    tone="critical"; verdict="💀 PATIENT LOST";
+    lineM=cu?`We lost them on the table — likely ${cu.danger}.`:"We lost them on the table.";
+    lineC=cu?`Hit the books on ${cu.domain} (start with "${cu.term}"). We don't lose the next one.`:"Regroup, doctor — next shift we save them.";
+  } else if(correct===TOTAL){
+    tone="perfect"; verdict="DISCHARGED — FULL RECOVERY";
+    lineM="Patient walked out in perfect health. Flawless shift, Doctor.";
+    lineC="Thirty for thirty — the vitals never dipped once. Bravo!";
+  } else if(patientHP>=70){
+    tone="saved"; verdict="PATIENT SAVED";
+    lineM=`Close call with ${cu.danger}, but you pulled them through.`;
+    lineC=`Review ${cu.domain} (esp. "${cu.term}") — that's where they nearly slipped.`;
+  } else if(patientHP>=40){
+    tone="stable"; verdict="PATIENT STABILIZED";
+    lineM=`${cap(cu.danger)} set us back hard — guarded, but breathing.`;
+    lineC=`Tighten up ${cu.domain} and the next patient walks out the door.`;
+  } else {
+    tone="critical"; verdict="PATIENT CRITICAL";
+    lineM=`Probable cause of the crash: ${cu.danger}.`;
+    lineC=`Hit the books on ${cu.domain} (start with "${cu.term}"). Next shift, we save them.`;
+  }
+  const diagnosis = cu ? cap(cu.danger) : "Patient made a full recovery — no complications.";
+  const diagLabel = tone==="perfect" ? "OUTCOME" : tone==="critical" ? "PROBABLE CAUSE OF ARREST" : "CLOSE CALL";
+  if(codeBlueHappened && !died && tone!=="perfect") lineM="We coded on the table — "+lineM.charAt(0).toLowerCase()+lineM.slice(1);
+  return {verdict,tone,lineM,lineC,diagnosis,diagLabel};
+}
+function repAvatar(neon){
+  const P=8, head=["..NNNN..",".CCCCCC.",".CCCCCC.",".CCCCCC.","..CCCC.."];
+  const map={C:'coat',N:'neonfill'}; let s='';
+  for(let r=0;r<head.length;r++)for(let c=0;c<head[r].length;c++){const cl=map[head[r][c]];if(cl)s+=`<rect class="${cl}" x="${c*P}" y="${r*P}" width="${P}" height="${P}"/>`;}
+  s+=`<rect class="scr" x="${2*P}" y="${2*P}" width="${4*P}" height="${2*P}"/>`;
+  s+=`<rect class="visor" x="${2*P+2}" y="${2*P+3}" width="${P-2}" height="${P-2}"/>`;
+  s+=`<rect class="visor" x="${4*P}" y="${2*P+3}" width="${P-2}" height="${P-2}"/>`;
+  s+=`<rect class="eyeshine" x="${2*P+3}" y="${2*P+4}" width="2" height="2"/>`;
+  s+=`<rect class="eyeshine" x="${4*P+1}" y="${2*P+4}" width="2" height="2"/>`;
+  return `<span class="repbot" style="--neon:${neon}"><svg viewBox="0 0 ${8*P} ${head.length*P}" class="repface">${s}</svg></span>`;
+}
+
+function quizSummary(died){
+  stopTimer();
+  pendingSubmit={score,correct};                 // offer to submit on the leaderboard screen
+  const rank=rankFor(correct);
+  const uniqueMissed=[...new Set(missed)];
+  const db=debrief(died);
+  const goodOutcome = !died && db.tone!=='critical';
+  react(goodOutcome?'win':'lose'); setEmo(goodOutcome?'great':'bad');
+  if(goodOutcome){ SFX.victory(); if(db.tone==='perfect'||db.tone==='saved') rain(160); victoryDance(); }
+  else { SFX.defeat(); }
+  const missedHtml = uniqueMissed.length
+    ? `<div class="rounds">
+         <div class="rounds-head">${repAvatar('#ff3ca6')}${repAvatar('#2ad4ff')}
+           <div class="rounds-cap">🩺 TEACHING ROUNDS<br><span>Doc, let's review what slipped — and why it matters on the job:</span></div>
+         </div>
+         <div class="reviewlist">
+           ${uniqueMissed.map(t=>`<div class="review">
+              <div class="rev-term">${t}</div>
+              <div class="rev-def">${TERMS[t]}</div>
+              <div class="rev-why"><b>WHY IT MATTERS</b>${RELEVANCE[t]||''}</div>
+           </div>`).join("")}
+         </div>
+       </div>`
+    : `<p style="color:var(--good);margin-top:18px;font-size:22px">🎉 FLAWLESS BOARD — EVERY TERM CORRECT!</p>`;
+  main.querySelector(".game").innerHTML=`
+    <div class="done-screen">
+      <div class="report">
+        <div class="rep-title">📟 DOCTOR'S DEBRIEF</div>
+        <div class="verdict ${db.tone}">${db.verdict}</div>
+        <div class="diagnosis">🔬 ${db.diagLabel}<br><b>${db.diagnosis}</b></div>
+        <div class="rep-line" style="animation-delay:.25s">${repAvatar('#ff3ca6')}<div class="rep-bubble m"><b>DR. MAGENTA</b><br>${db.lineM}</div></div>
+        <div class="rep-line" style="animation-delay:.5s">${repAvatar('#2ad4ff')}<div class="rep-bubble c"><b>DR. CYAN</b><br>${db.lineC}</div></div>
+      </div>
+      <div class="rank-badge" style="color:${rank.col}">${rank.t}</div>
+      <div class="big" id="finalScore">0</div>
+      <div class="donestats">
+        <div class="stat">CORRECT <b style="color:var(--good)">${correct}</b>/${TOTAL}</div>
+        <div class="stat">PATIENT <b>${patientHP}% HP</b></div>
+        <div class="stat">BEST COMBO <b>${maxStreak}🔥</b></div>
+        <div class="stat">MAX MULTI <b>x${multiplierFor(maxStreak)}</b></div>
+      </div>
+      ${missedHtml}
+      <div style="margin-top:22px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn" onclick="showLeaderboard()">🏆 ADD TO LEADERBOARD</button>
+        <button class="btn ghost" onclick="renderQuiz()">PLAY AGAIN</button>
+      </div>
+    </div>`;
+  animateNum($("#finalScore"),score);
+}
+
+/* ===================== LEADERBOARD ===================== */
+function esc(s){return String(s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));}
+function lbReady(){ return LB.url && LB.url.indexOf("YOUR-PROJECT")<0 && LB.anonKey && LB.anonKey.indexOf("YOUR-")<0; }
+function lbBlobOn(){ return LB.blob && LB.blob.indexOf("jsonBlob/")>0; }
+function lbGlobal(){ return lbReady() || lbBlobOn(); }
+function lbHeaders(extra){ return Object.assign({apikey:LB.anonKey,Authorization:"Bearer "+LB.anonKey}, extra||{}); }
+function lbLocal(){ try{ return JSON.parse(localStorage.getItem("mq_scores")||"[]"); }catch(e){ return []; } }
+function lbSort(a){ return (Array.isArray(a)?a:[]).slice().sort((x,y)=>y.score-x.score); }
+async function lbFetch(){
+  if(lbReady()){
+    try{
+      const r=await fetch(`${LB.url}/rest/v1/${LB.table}?select=name,score,correct&order=score.desc&limit=20`,{headers:lbHeaders()});
+      if(r.ok) return await r.json();
+    }catch(e){}
+  } else if(lbBlobOn()){
+    try{
+      const r=await fetch(LB.blob,{cache:"no-store"});
+      if(r.ok) return lbSort(await r.json()).slice(0,20);
+    }catch(e){}
+  }
+  return lbSort(lbLocal()).slice(0,20);
+}
+async function lbSubmit(name,score,correct){
+  name=(name||"ANON").slice(0,16); const entry={name,score,correct}; let remote=false;
+  if(lbReady()){
+    try{
+      const r=await fetch(`${LB.url}/rest/v1/${LB.table}`,{method:"POST",headers:lbHeaders({"Content-Type":"application/json",Prefer:"return=minimal"}),body:JSON.stringify(entry)});
+      remote=r.ok;
+    }catch(e){}
+  } else if(lbBlobOn()){
+    try{
+      const g=await fetch(LB.blob,{cache:"no-store"}); let a=[]; if(g.ok){ a=await g.json(); if(!Array.isArray(a)) a=[]; }
+      a.push(entry); a=lbSort(a).slice(0,100);
+      const p=await fetch(LB.blob,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(a)});
+      remote=p.ok;
+    }catch(e){}
+  }
+  try{ const la=lbLocal(); la.push(entry); localStorage.setItem("mq_scores",JSON.stringify(lbSort(la).slice(0,50))); }catch(e){}
+  return remote;
+}
+function renderLbList(rows,hiName,hiScore){
+  const el=$("#lbList"); if(!el)return;
+  if(!rows||!rows.length){ el.innerHTML='<p style="color:var(--muted);text-align:center">No scores yet — be the first!</p>'; return; }
+  el.innerHTML=rows.map((r,i)=>{
+    const me=(hiName!=null && r.name===hiName && r.score===hiScore);
+    return `<div class="lbrow${me?' me':''}"><span class="lbrank">${i+1}</span><span class="lbname">${esc(r.name)}</span><span class="lbscore">${r.score}</span><span class="lbcorrect">${r.correct}/${TOTAL}</span></div>`;
+  }).join("");
+}
+function showLeaderboard(hiName,hiScore){
+  stopTimer(); clearDocFx(); restartBtn.classList.remove("hidden");
+  const ps=pendingSubmit;
+  main.innerHTML=`
+    <div class="game">
+      <h2>🏆 HIGH SCORES</h2>
+      <p class="sub">Top shifts${lbGlobal()?' — everyone who plays':' — local to this device'}.</p>
+      ${ps?`<div class="lbentry">
+        <div class="lbentry-t">🏁 Your shift: <b>${ps.score} pts</b> · ${ps.correct}/${TOTAL} correct — enter your name to post it:</div>
+        <div class="lbsubmit"><input id="lbName" maxlength="16" placeholder="YOUR NAME" autocomplete="off" spellcheck="false"/><button class="btn" id="lbSubmitBtn">SUBMIT</button></div>
+      </div>`:''}
+      ${(hiName&&!ps)?`<p class="lbdone">✓ Posted as <b>${esc(hiName)}</b>!</p>`:''}
+      <div id="lbList" class="lblist">Loading…</div>
+      <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn" onclick="renderQuiz()">▶ PLAY${ps?' (skip)':''}</button>
+        <button class="btn ghost" onclick="renderSplash()">‹ MENU</button>
+      </div>
+    </div>`;
+  if(ps){
+    const nameIn=$("#lbName"), subBtn=$("#lbSubmitBtn");
+    if(nameIn){ try{ nameIn.value=localStorage.getItem("mq_name")||""; }catch(e){} nameIn.focus(); }
+    if(subBtn) subBtn.onclick=()=>{
+      const nm=((nameIn&&nameIn.value)||"ANON").trim().slice(0,16)||"ANON";
+      try{ localStorage.setItem("mq_name",nm); }catch(e){}
+      subBtn.disabled=true; subBtn.textContent="SAVING…";
+      const sc=ps.score; lbSubmit(nm,sc,ps.correct).then(()=>{ pendingSubmit=null; showLeaderboard(nm,sc); });
+    };
+  }
+  lbFetch().then(rows=>renderLbList(rows,hiName,hiScore));
+}
+
+/* ===================== SPLASH / INTRO ===================== */
+function renderSplash(){
+  stopTimer(); pendingSubmit=null; clearDocFx();
+  document.body.classList.remove("playing");   // backdrop visible on the splash
+  restartBtn.classList.add("hidden");
+  main.innerHTML=`
+    <div class="splash">
+      <div class="splash-bots">${repAvatar('#ff3ca6')}${repAvatar('#2ad4ff')}</div>
+      <h1 class="splash-title">MUSCLE QUIZ: STAT!</h1>
+      <p class="splash-sub">A retro med-sim study game · Muscles · Muscle Tissue · Landmarks</p>
+      <div class="splash-card">
+        <p>🩺 Tap tiles on the board and answer the A&amp;P call before the timer runs out.</p>
+        <p>🔥 Chain right answers for <b>combo multipliers</b> · ⚡ <b>bonus tiles</b> pay double.</p>
+        <p>❤️ Correct answers <b>heal</b> the patient; wrong ones <b>hurt</b> them (more for higher tiles) — <b>if they flatline, it's game over.</b></p>
+        <p>🤖 Dr. Magenta &amp; Dr. Cyan quiz you and call the diagnosis at shift's end.</p>
+        <p>💬 <b>Watch their banter during play</b> — between calls they drop muscle facts, so pausing pays off.</p>
+        <p>🧠 The board <b>adapts</b> — terms you miss (or haven't seen) show up more often until you nail them.</p>
+        <p style="color:var(--muted)">⏱ Prefer no pressure? Toggle <b>TIMED MODE</b> off any time.</p>
+      </div>
+      <p class="splash-ask">Ready for your shift, doctor?</p>
+      <div class="splash-btns">
+        <button class="btn splash-go" id="goBtn">▶ GO!</button>
+        <button class="btn ghost" onclick="showLeaderboard()">🏆 HIGH SCORES</button>
+      </div>
+    </div>`;
+  $("#goBtn").onclick=()=>{ initAudio(); setTimeout(()=>SFX.welcome(),120); renderQuiz(); };
+}
+
+renderSplash();
+</script>
+</body>
+</html>
